@@ -1,10 +1,9 @@
 import gym
-import numpy as np
-import copy
 import argparse
-import random
 import os
+# import os.path as osp
 import torch
+from typing import Any, Callable, Dict, Optional, Type, Union
 
 from stable_baselines3.common.torch_layers import (
     BaseFeaturesExtractor,
@@ -23,30 +22,57 @@ from softgym.utils.normalized_env import normalize
 from softgym.utils.visualization import save_numpy_as_gif
 import pyflex
 
-# needs revision
-def make_env(env_name, env_kwargs, rank, seed=0):
-    """
-    Utility function for multiprocessed env.
 
-    :param env_id: (str) the environment ID
-    :param num_env: (int) the number of environments you wish to have in subprocesses
-    :param seed: (int) the inital seed for RNG
-    :param rank: (int) index of the subprocess
-    """
-    def _init():
-        env = normalize(SOFTGYM_ENVS[env_name](**env_kwargs))
-        env.seed(seed + rank)
-        return env
-    set_random_seed(seed)
-    return _init
+def make_vec_env(
+    env_name: Union[str,Any],
+    n_envs: int = 1,
+    seed: Optional[int] = None,
+    start_index: int = 0,
+    monitor_dir: Optional[str] = None,
+    wrapper_class: Optional[Callable[[gym.Env], gym.Env]] = None,
+    env_kwargs: Optional[Dict[str, Any]] = None,
+    vec_env_cls: Optional[Type[Union[DummyVecEnv, SubprocVecEnv]]] = None,
+    vec_env_kwargs: Optional[Dict[str, Any]] = None,
+    monitor_kwargs: Optional[Dict[str, Any]] = None,
+    wrapper_kwargs: Optional[Dict[str, Any]] = None):
 
+    env_kwargs = {} if env_kwargs is None else env_kwargs
+    vec_env_kwargs = {} if vec_env_kwargs is None else vec_env_kwargs
+    monitor_kwargs = {} if monitor_kwargs is None else monitor_kwargs
+    wrapper_kwargs = {} if wrapper_kwargs is None else wrapper_kwargs
 
+    def make_env(rank):
+        def _init():
+            env = normalize(SOFTGYM_ENVS[env_name](**env_kwargs))
+            if seed is not None:
+                env.seed(seed + rank)
+                env.action_space.seed(seed + rank)
+            # Wrap the env in a Monitor wrapper
+            # to have additional training information
+            monitor_path = os.path.join(monitor_dir, str(rank)) if monitor_dir is not None else None
+            # Create the monitor folder if needed
+            if monitor_path is not None:
+                os.makedirs(monitor_dir, exist_ok=True)
+            env = Monitor(env, filename=monitor_path, **monitor_kwargs)
+            # Optionally, wrap the environment with the provided wrapper
+            if wrapper_class is not None:
+                env = wrapper_class(env, **wrapper_kwargs)
+            return env
 
+        return _init
+
+    # No custom VecEnv is passed
+    if vec_env_cls is None:
+        # Default: use a DummyVecEnv
+        vec_env_cls = DummyVecEnv
+
+    return vec_env_cls([make_env(i + start_index) for i in range(n_envs)], **vec_env_kwargs)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
     # ['PassWater', 'PourWater', 'PourWaterAmount', 'RopeFlatten', 'ClothFold', 'ClothFlatten', 'ClothDrop', 'ClothFoldCrumpled', 'ClothFoldDrop', 'RopeConfiguration']
     parser.add_argument('--env_name', type=str, default='DistributeWater')
+    parser.add_argument('--n_envs', help='the number of environments in parallel', type=int, default=1)
     parser.add_argument('--headless', type=int, default=1, help='Whether to run the environment with headless rendering')
     parser.add_argument('--num_variations', type=int, default=1, help='Number of environment variations to be generated')
     parser.add_argument('--training_steps', type=int, default=50000, help='Number of total timesteps of training')
@@ -57,12 +83,17 @@ if __name__ == "__main__":
     parser.add_argument('--device', type=str, default='cpu', help='the type of device to use (cpu|cuda)')
     parser.add_argument('--log_interval', help='the number of episodes before logging', type=int, default=100)
     parser.add_argument('--log_dir', help='the path to the log files', type=str, default='log_dir')
-    parser.add_argument('--tb_log_name', help='the name of the run for TensorBoard logging', type=str, default='SAC')
+    parser.add_argument('--log_name', help='the name of the run for TensorBoard logging', type=str, default='SAC')
+    parser.add_argument('--save_dir', help='the path to save models', type=str, default='save_dir')
+
 
     args = parser.parse_args()
 
     if not os.path.exists(args.log_dir):
         os.makedirs(args.log_dir)
+    save_dir = args.save_dir + '/' + args.log_name + '/'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
 
     env_kwargs = env_arg_dict[args.env_name]
 
@@ -76,9 +107,11 @@ if __name__ == "__main__":
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
 
-    # needs updating with vec_env
-    env = make_env(args.env_name, env_kwargs, 0)
-    env = DummyVecEnv([env])
+    if args.n_envs == 1:
+        args.vec_env_cls = DummyVecEnv
+    else:
+        args.vec_env_cls = SubprocVecEnv
+    env = make_vec_env(args.env_name, n_envs=args.n_envs, env_kwargs=env_kwargs, vec_env_cls=args.vec_env_cls)
     model = SAC("MlpPolicy", 
                 env,
                 learning_rate = args.learning_rate,
@@ -88,4 +121,5 @@ if __name__ == "__main__":
                 device=args.device,
                 tensorboard_log=args.log_dir,
                 verbose=1)
-    model.learn(total_timesteps=args.training_steps, log_interval=args.log_interval, tb_log_name=args.tb_log_name)
+    model.learn(total_timesteps=args.training_steps, log_interval=args.log_interval, tb_log_name=args.log_name)
+    model.save(path=save_dir+'model')
