@@ -76,6 +76,8 @@ if __name__ == "__main__":
     parser.add_argument('--headless', type=int, default=1, help='Whether to run the environment with headless rendering')
     parser.add_argument('--num_variations', type=int, default=1, help='Number of environment variations to be generated')
     parser.add_argument('--training_steps', type=int, default=50000, help='Number of total timesteps of training')
+    parser.add_argument('--train_freq', type=int, default=1, help='Update (call the train function) the model every train_freq steps (train_freq*n if do multi-processing)')
+    parser.add_argument('--grad_steps', type=int, default=1, help='How many gradient steps to do for each train function call (after each rollout and it can only rollout one step at a time)')
     parser.add_argument('--learning_rate', type=float, default=0.0003, help='learning rate')
     parser.add_argument('--buffer_size', type=int, default=1000000, help='buffer size')
     parser.add_argument('--batch_size', type=int, default=256, help='batch size')
@@ -85,6 +87,7 @@ if __name__ == "__main__":
     parser.add_argument('--log_dir', help='the path to the log files', type=str, default='log_dir')
     parser.add_argument('--log_name', help='the name of the run for TensorBoard logging', type=str, default='SAC')
     parser.add_argument('--save_dir', help='the path to save models', type=str, default='save_dir')
+    parser.add_argument('--seed', help='the seed number to use', type=int, default=0)
 
 
     args = parser.parse_args()
@@ -111,10 +114,12 @@ if __name__ == "__main__":
         args.vec_env_cls = DummyVecEnv
     else:
         args.vec_env_cls = SubprocVecEnv
-    env = make_vec_env(args.env_name, n_envs=args.n_envs, env_kwargs=env_kwargs, vec_env_cls=args.vec_env_cls)
+    env = make_vec_env(args.env_name, n_envs=args.n_envs, seed=args.seed, env_kwargs=env_kwargs, vec_env_cls=args.vec_env_cls)
     model = SAC("MlpPolicy", 
                 env,
                 learning_rate = args.learning_rate,
+                train_freq=args.train_freq,
+                gradient_steps=args.grad_steps,
                 buffer_size=args.buffer_size,
                 batch_size=args.batch_size,
                 learning_starts=args.learning_starts,
