@@ -13,7 +13,7 @@ from stable_baselines3.common.torch_layers import (
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
-from stable_baselines3 import HER, SAC
+from stable_baselines3 import HerReplayBuffer, SAC
 
 import softgym
 print(softgym.__file__)
@@ -98,21 +98,20 @@ if __name__ == "__main__":
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
 
     env = normalize(SOFTGYM_ENVS[args.env_name](**env_kwargs))
-    model = SAC.load(path=args.load_file_dir, device=args.device)
+    model = SAC.load(path=args.load_file_dir, device=args.device, env=env)
 
-    obs = env.reset()
     episode_reward_for_reg = []
     frames = [env.get_image(args.img_size, args.img_size)]
     for i in range(args.num_episodes):
         done = False
         episode_reward = 0
+        obs = env.reset()
         while not done:
             action, _states = model.predict(obs, deterministic=True)
             obs, reward, done, info = env.step(action, record_continuous_video=True, img_size=args.img_size)
             episode_reward+= reward
             frames.extend(info['flex_env_recorded_frames'])
             if done:
-                obs = env.reset()
                 episode_reward_for_reg.append(episode_reward)
                 break
     print('testing results:')

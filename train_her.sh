@@ -1,11 +1,12 @@
 export OMP_NUM_THREADS=1
 
 python -u train_softgym.py \
-  --env_name DistributeWater \
-  --n_envs 4 \
+  --env_name DistributeWaterGoal \
+  --n_envs 1 \
   --headless 1 \
   --num_variations 1 \
-  --training_steps 200000 \
+  --her 1 \
+  --training_steps 300000 \
   --learning_rate 0.0003 \
   --train_freq 1 \
   --grad_steps 1 \
@@ -13,9 +14,13 @@ python -u train_softgym.py \
   --batch_size 256 \
   --learning_starts 100 \
   --device cuda \
-  --log_interval 100 \
+  --max_episode_length_her 75 \
+  --goal_selection_strategy future \
+  --n_sampled_goal 4 \
+  --online_sampling True \
+  --log_interval 20 \
   --log_dir log_dir \
-  --log_name 4_envs_train_freq_1_grad_steps_1 \
+  --log_name her_try3 \
   --save_dir save_dir \
   --seed 0 \
-  | tee train_vec.log
+  | tee train_her.log

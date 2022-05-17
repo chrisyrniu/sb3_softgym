@@ -7,7 +7,7 @@ python -u test.py \
   --device cuda \
   --load_file_dir save_dir/run2/model.zip \
   --render 1 \
-  --num_episodes 5 \
+  --num_episodes 1 \
   --save_video 1 \
   --save_video_dir save_dir/run2 \
   | tee test.log
