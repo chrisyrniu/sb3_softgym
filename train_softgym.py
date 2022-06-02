@@ -95,6 +95,12 @@ if __name__ == "__main__":
     parser.add_argument('--goal_selection_strategy', type=str, default='future', help='Strategy for sampling goals for replay (future, final or episode)')
     parser.add_argument('--n_sampled_goal', type=int, default=4, help='Number of virtual transitions to create per real transition, by sampling new goals.')
     parser.add_argument('--online_sampling', type=bool, default=True, help='If new transitions will not be saved in the replay buffer and will only be created at sampling time')
+    # LoadWaterGoal args
+    parser.add_argument('--curr_start_step', type=int, default=0, help='the training step to start curriculum learning')
+    parser.add_argument('--curr_end_step', type=int, default=0, help='the training step to end curriculum learning')
+    parser.add_argument('--curr_start_thresh', type=float, default=0.4, help='the (water amount) threshold to start curriculum learning')
+    parser.add_argument('--curr_end_thresh', type=float, default=0.8, help='the (water amount) threshold to end curriculum learning')
+    
     args = parser.parse_args()
 
     if not os.path.exists(args.log_dir):
@@ -114,6 +120,12 @@ if __name__ == "__main__":
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
+
+    if args.env_name == "LoadWaterGoal":
+        env_kwargs['curr_start_step'] = args.curr_start_step
+        env_kwargs['curr_end_step'] = args.curr_end_step
+        env_kwargs['curr_start_thresh'] = args.curr_start_thresh
+        env_kwargs['curr_end_thresh'] = args.curr_end_thresh
 
     if args.n_envs == 1:
         args.vec_env_cls = DummyVecEnv
