@@ -22,6 +22,7 @@ from softgym.registered_env import env_arg_dict, SOFTGYM_ENVS
 from softgym.utils.normalized_env import normalize
 from softgym.utils.visualization import save_numpy_as_gif
 import pyflex
+from stable_baselines3.common.utils import set_random_seed
 
 
 def make_vec_env(
@@ -41,6 +42,8 @@ def make_vec_env(
     vec_env_kwargs = {} if vec_env_kwargs is None else vec_env_kwargs
     monitor_kwargs = {} if monitor_kwargs is None else monitor_kwargs
     wrapper_kwargs = {} if wrapper_kwargs is None else wrapper_kwargs
+
+    set_random_seed(seed)
 
     def make_env(rank):
         def _init():
@@ -165,6 +168,7 @@ if __name__ == "__main__":
                 learning_starts=args.learning_starts,
                 device=args.device,
                 tensorboard_log=args.log_dir,
-                verbose=1)
+                verbose=1,
+                seed=args.seed)
     model.learn(total_timesteps=args.training_steps, log_interval=args.log_interval, tb_log_name=args.log_name, callback=checkpoint_callback)
     model.save(path=save_dir+'model')
