@@ -14,7 +14,8 @@ from stable_baselines3.common.torch_layers import (
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
-from stable_baselines3 import HerReplayBuffer, SAC
+from stable_baselines3 import HerReplayBuffer
+from sac import SAC
 
 import softgym
 print(softgym.__file__)
