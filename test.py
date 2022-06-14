@@ -5,41 +5,36 @@ import os.path as osp
 import torch
 from typing import Any, Callable, Dict, Optional, Type, Union
 
-from stable_baselines3.common.torch_layers import (
-    BaseFeaturesExtractor,
-    CombinedExtractor,
-    FlattenExtractor
-)
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
-from stable_baselines3 import HerReplayBuffer, SAC
+from her_replay_buffer import HerReplayBuffer
+from sac import SAC
 
 import softgym
-print(softgym.__file__)
 from softgym.registered_env import env_arg_dict, SOFTGYM_ENVS
 from softgym.utils.normalized_env import normalize
 from softgym.utils.visualization import save_numpy_as_gif
 import pyflex
 
 
-def make_vec_env(
-    env_name: Union[str,Any],
-    n_envs: int = 1,
-    seed: Optional[int] = None,
-    start_index: int = 0,
-    monitor_dir: Optional[str] = None,
-    wrapper_class: Optional[Callable[[gym.Env], gym.Env]] = None,
-    env_kwargs: Optional[Dict[str, Any]] = None,
-    vec_env_cls: Optional[Type[Union[DummyVecEnv, SubprocVecEnv]]] = None,
-    vec_env_kwargs: Optional[Dict[str, Any]] = None,
-    monitor_kwargs: Optional[Dict[str, Any]] = None,
-    wrapper_kwargs: Optional[Dict[str, Any]] = None):
+# def make_vec_env(
+    # env_name: Union[str,Any],
+    # n_envs: int = 1,
+    # seed: Optional[int] = None,
+    # start_index: int = 0,
+    # monitor_dir: Optional[str] = None,
+    # wrapper_class: Optional[Callable[[gym.Env], gym.Env]] = None,
+    # env_kwargs: Optional[Dict[str, Any]] = None,
+    # vec_env_cls: Optional[Type[Union[DummyVecEnv, SubprocVecEnv]]] = None,
+    # vec_env_kwargs: Optional[Dict[str, Any]] = None,
+    # monitor_kwargs: Optional[Dict[str, Any]] = None,
+    # wrapper_kwargs: Optional[Dict[str, Any]] = None):
 
-    env_kwargs = {} if env_kwargs is None else env_kwargs
-    vec_env_kwargs = {} if vec_env_kwargs is None else vec_env_kwargs
-    monitor_kwargs = {} if monitor_kwargs is None else monitor_kwargs
-    wrapper_kwargs = {} if wrapper_kwargs is None else wrapper_kwargs
+    # env_kwargs = {} if env_kwargs is None else env_kwargs
+    # vec_env_kwargs = {} if vec_env_kwargs is None else vec_env_kwargs
+    # monitor_kwargs = {} if monitor_kwargs is None else monitor_kwargs
+    # wrapper_kwargs = {} if wrapper_kwargs is None else wrapper_kwargs
 
     # def make_env(rank):
     #     def _init():
@@ -82,6 +77,13 @@ if __name__ == "__main__":
     parser.add_argument('--img_size', type=int, default=720, help='Size of the recorded videos')
     parser.add_argument('--save_video', type=int, default=1, help='if save the video')
     parser.add_argument('--save_video_dir', type=str, default='save_dir', help='Path to the saved video')
+    # LoadWaterGoal args
+    parser.add_argument('--curr_start_step', type=int, default=0)
+    parser.add_argument('--curr_end_step', type=int, default=0)
+    parser.add_argument('--curr_start_thresh', type=float, default=0.4)
+    parser.add_argument('--curr_end_thresh', type=float, default=0.8)
+    # LoadWaterAmount args
+    parser.add_argument('--goal_sampling_mode', type=int, default=0, help='the mode for sampling the targeted amount of water')
 
     args = parser.parse_args()
 
@@ -97,8 +99,19 @@ if __name__ == "__main__":
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
 
+    if args.env_name == "LoadWaterGoal":
+        env_kwargs['curr_start_step'] = args.curr_start_step
+        env_kwargs['curr_end_step'] = args.curr_end_step
+        env_kwargs['curr_start_thresh'] = args.curr_start_thresh
+        env_kwargs['curr_end_thresh'] = args.curr_end_thresh
+    if args.env_name == "LoadWaterAmount":
+        env_kwargs['goal_sampling_mode'] = args.goal_sampling_mode
+
     env = normalize(SOFTGYM_ENVS[args.env_name](**env_kwargs))
-    model = SAC.load(path=args.load_file_dir, device=args.device, env=env)
+    model = SAC.load(path=args.load_file_dir, device=args.device, env=env, seed=0)
+    seed = model.seed
+    env.seed(seed)
+    env.action_space.seed(seed)
 
     episode_reward_for_reg = []
     frames = [env.get_image(args.img_size, args.img_size)]
@@ -106,7 +119,9 @@ if __name__ == "__main__":
         done = False
         episode_reward = 0
         obs = env.reset()
+        t = 0
         while not done:
+            t += 1
             action, _states = model.predict(obs, deterministic=True)
             obs, reward, done, info = env.step(action, record_continuous_video=True, img_size=args.img_size)
             episode_reward+= reward
