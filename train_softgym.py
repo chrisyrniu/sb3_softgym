@@ -14,7 +14,7 @@ from stable_baselines3.common.torch_layers import (
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
-from stable_baselines3 import HerReplayBuffer
+from her_replay_buffer import HerReplayBuffer
 from sac import SAC
 
 import softgym
@@ -104,7 +104,9 @@ if __name__ == "__main__":
     parser.add_argument('--curr_end_step', type=int, default=0, help='the training step to end curriculum learning')
     parser.add_argument('--curr_start_thresh', type=float, default=0.4, help='the (water amount) threshold to start curriculum learning')
     parser.add_argument('--curr_end_thresh', type=float, default=0.8, help='the (water amount) threshold to end curriculum learning')
-    
+    # LoadWaterAmount args
+    parser.add_argument('--goal_sampling_mode', type=int, default=0, help='the mode for sampling the targeted amount of water')
+
     args = parser.parse_args()
 
     if not os.path.exists(args.log_dir):
@@ -130,6 +132,8 @@ if __name__ == "__main__":
         env_kwargs['curr_end_step'] = args.curr_end_step
         env_kwargs['curr_start_thresh'] = args.curr_start_thresh
         env_kwargs['curr_end_thresh'] = args.curr_end_thresh
+    if args.env_name == "LoadWaterAmount":
+        env_kwargs['goal_sampling_mode'] = args.goal_sampling_mode
 
     if args.n_envs == 1:
         args.vec_env_cls = DummyVecEnv
