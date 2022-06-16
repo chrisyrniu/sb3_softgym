@@ -104,11 +104,11 @@ if __name__ == "__main__":
         env_kwargs['curr_end_step'] = args.curr_end_step
         env_kwargs['curr_start_thresh'] = args.curr_start_thresh
         env_kwargs['curr_end_thresh'] = args.curr_end_thresh
-    if args.env_name == "LoadWaterAmount":
+    if args.env_name == "LoadWaterAmount" or args.env_name == "LoadWaterAmountHard":
         env_kwargs['goal_sampling_mode'] = args.goal_sampling_mode
 
     env = normalize(SOFTGYM_ENVS[args.env_name](**env_kwargs))
-    model = SAC.load(path=args.load_file_dir, device=args.device, env=env, seed=0)
+    model = SAC.load(path=args.load_file_dir, device=args.device, env=env)
     seed = model.seed
     env.seed(seed)
     env.action_space.seed(seed)
