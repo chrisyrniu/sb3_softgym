@@ -87,6 +87,7 @@ if __name__ == "__main__":
     parser.add_argument('--buffer_size', type=int, default=1000000, help='buffer size')
     parser.add_argument('--batch_size', type=int, default=256, help='batch size')
     parser.add_argument('--learning_starts', type=int, default=100, help='how many steps of the model to collect transitions for before learning starts')
+    parser.add_argument('--ent_coef', type=str, default='auto', help='entropy regularization coefficient')
     parser.add_argument('--device', type=str, default='cpu', help='the type of device to use (cpu|cuda)')
     parser.add_argument('--log_interval', help='the number of episodes before logging', type=int, default=100)
     parser.add_argument('--log_dir', help='the path to the log files', type=str, default='log_dir')
@@ -127,7 +128,8 @@ if __name__ == "__main__":
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
 
-    if args.env_name == "LoadWaterGoal":
+    if args.env_name == "LoadWaterGoal" or args.env_name == "LoadWaterGoalHard":
+        print('heyheyhey')
         env_kwargs['curr_start_step'] = args.curr_start_step
         env_kwargs['curr_end_step'] = args.curr_end_step
         env_kwargs['curr_start_thresh'] = args.curr_start_thresh
@@ -171,6 +173,7 @@ if __name__ == "__main__":
                 replay_buffer_kwargs = args.replay_buffer_kwargs,
                 batch_size=args.batch_size,
                 learning_starts=args.learning_starts,
+                ent_coef=args.ent_coef,
                 device=args.device,
                 tensorboard_log=args.log_dir,
                 verbose=1,
