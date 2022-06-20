@@ -129,7 +129,6 @@ if __name__ == "__main__":
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
 
     if args.env_name == "LoadWaterGoal" or args.env_name == "LoadWaterGoalHard":
-        print('heyheyhey')
         env_kwargs['curr_start_step'] = args.curr_start_step
         env_kwargs['curr_end_step'] = args.curr_end_step
         env_kwargs['curr_start_thresh'] = args.curr_start_thresh
