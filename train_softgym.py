@@ -133,7 +133,7 @@ if __name__ == "__main__":
         env_kwargs['curr_end_step'] = args.curr_end_step
         env_kwargs['curr_start_thresh'] = args.curr_start_thresh
         env_kwargs['curr_end_thresh'] = args.curr_end_thresh
-    if args.env_name == "LoadWaterAmount" or args.env_name == "LoadWaterAmountHard":
+    if args.env_name == "LoadWaterAmount" or args.env_name == "LoadWaterAmountHard" or args.env_name == "LoadWater":
         env_kwargs['goal_sampling_mode'] = args.goal_sampling_mode
 
     if args.n_envs == 1:

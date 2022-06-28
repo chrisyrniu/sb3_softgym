@@ -99,12 +99,12 @@ if __name__ == "__main__":
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
 
-    if args.env_name == "LoadWaterGoal" or args.env_name == "LoadWaterGoalHard":
+    if args.env_name == "LoadWaterGoal" or args.env_name == "LoadWaterGoalHard" or args.env_name == "LoadWater":
         env_kwargs['curr_start_step'] = args.curr_start_step
         env_kwargs['curr_end_step'] = args.curr_end_step
         env_kwargs['curr_start_thresh'] = args.curr_start_thresh
         env_kwargs['curr_end_thresh'] = args.curr_end_thresh
-    if args.env_name == "LoadWaterAmount" or args.env_name == "LoadWaterAmountHard":
+    if args.env_name == "LoadWaterAmount" or args.env_name == "LoadWaterAmountHard" or args.env_name == "LoadWater":
         env_kwargs['goal_sampling_mode'] = args.goal_sampling_mode
 
     env = normalize(SOFTGYM_ENVS[args.env_name](**env_kwargs))
@@ -116,6 +116,7 @@ if __name__ == "__main__":
     episode_reward_for_reg = []
     frames = [env.get_image(args.img_size, args.img_size)]
     for i in range(args.num_episodes):
+        print(i)
         done = False
         episode_reward = 0
         obs = env.reset()
