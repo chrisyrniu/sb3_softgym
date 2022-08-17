@@ -18,7 +18,6 @@ from her_replay_buffer import HerReplayBuffer
 from sac import SAC
 
 import softgym
-print(softgym.__file__)
 from softgym.registered_env import env_arg_dict, SOFTGYM_ENVS
 from softgym.utils.normalized_env import normalize
 from softgym.utils.visualization import save_numpy_as_gif
