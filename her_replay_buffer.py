@@ -15,7 +15,6 @@ from stable_baselines3.her.goal_selection_strategy import KEY_TO_GOAL_STRATEGY, 
 def get_time_limit(env: VecEnv, current_max_episode_length: Optional[int]) -> int:
     """
     Get time limit from environment.
-
     :param env: Environment from which we want to get the time limit.
     :param current_max_episode_length: Current value for max_episode_length.
     :return: max episode length
@@ -28,13 +27,13 @@ def get_time_limit(env: VecEnv, current_max_episode_length: Optional[int]) -> in
             if current_max_episode_length is None:
                 raise AttributeError
         # if not available check if a valid value was passed as an argument
-        except AttributeError:
+        except AttributeError as e:
             raise ValueError(
                 "The max episode length could not be inferred.\n"
                 "You must specify a `max_episode_steps` when registering the environment,\n"
                 "use a `gym.wrappers.TimeLimit` wrapper "
                 "or pass `max_episode_length` to the model constructor"
-            )
+            ) from e
     return current_max_episode_length
 
 
@@ -42,19 +41,14 @@ class HerReplayBuffer(DictReplayBuffer):
     """
     Hindsight Experience Replay (HER) buffer.
     Paper: https://arxiv.org/abs/1707.01495
-
     .. warning::
-
       For performance reasons, the maximum number of steps per episodes must be specified.
       In most cases, it will be inferred if you specify ``max_episode_steps`` when registering the environment
       or if you use a ``gym.wrappers.TimeLimit`` (and ``env.spec`` is not None).
       Otherwise, you can directly pass ``max_episode_length`` to the replay buffer constructor.
-
-
     Replay buffer for sampling HER (Hindsight Experience Replay) transitions.
     In the online sampling case, these new transitions will not be saved in the replay buffer
     and will only be created at sampling time.
-
     :param env: The training environment
     :param buffer_size: The size of the buffer measured in transitions.
     :param max_episode_length: The maximum length of an episode. If not specified,
@@ -82,7 +76,7 @@ class HerReplayBuffer(DictReplayBuffer):
         handle_timeout_termination: bool = True,
     ):
 
-        super(HerReplayBuffer, self).__init__(buffer_size, env.observation_space, env.action_space, device, env.num_envs)
+        super().__init__(buffer_size, env.observation_space, env.action_space, device, env.num_envs)
 
         # convert goal_selection_strategy into GoalSelectionStrategy if string
         if isinstance(goal_selection_strategy, str):
@@ -154,7 +148,6 @@ class HerReplayBuffer(DictReplayBuffer):
     def __getstate__(self) -> Dict[str, Any]:
         """
         Gets state for pickling.
-
         Excludes self.env, as in general Env's may not be pickleable.
         Note: when using offline sampling, this will also save the offline replay buffer.
         """
@@ -166,9 +159,7 @@ class HerReplayBuffer(DictReplayBuffer):
     def __setstate__(self, state: Dict[str, Any]) -> None:
         """
         Restores pickled state.
-
         User must call ``set_env()`` after unpickling before using.
-
         :param state:
         """
         self.__dict__.update(state)
@@ -178,7 +169,6 @@ class HerReplayBuffer(DictReplayBuffer):
     def set_env(self, env: VecEnv) -> None:
         """
         Sets the environment.
-
         :param env:
         """
         if self.env is not None:
@@ -197,7 +187,6 @@ class HerReplayBuffer(DictReplayBuffer):
         Sample function for online sampling of HER transition,
         this replaces the "regular" replay buffer ``sample()``
         method in the ``train()`` function.
-
         :param batch_size: Number of element to sample
         :param env: Associated gym VecEnv
             to normalize the observations/rewards when sampling
@@ -215,7 +204,6 @@ class HerReplayBuffer(DictReplayBuffer):
         Sample function for offline sampling of HER transition,
         in that case, only one episode is used and transitions
         are added to the regular replay buffer.
-
         :param n_sampled_goal: Number of sampled goals for replay
         :return: at most(n_sampled_goal * episode_length) HER transitions.
         """
@@ -237,7 +225,6 @@ class HerReplayBuffer(DictReplayBuffer):
         """
         Sample goals based on goal_selection_strategy.
         This is a vectorized (fast) version.
-
         :param episode_indices: Episode indices to use.
         :param her_indices: HER indices.
         :param transitions_indices: Transition indices to use.
@@ -252,7 +239,7 @@ class HerReplayBuffer(DictReplayBuffer):
         elif self.goal_selection_strategy == GoalSelectionStrategy.FUTURE:
             # replay with random state which comes from the same episode and was observed after current transition
             transitions_indices = np.random.randint(
-                transitions_indices[her_indices] + 1, self.episode_lengths[her_episode_indices]
+                transitions_indices[her_indices], self.episode_lengths[her_episode_indices]
             )
 
         elif self.goal_selection_strategy == GoalSelectionStrategy.EPISODE:
@@ -262,7 +249,7 @@ class HerReplayBuffer(DictReplayBuffer):
         else:
             raise ValueError(f"Strategy {self.goal_selection_strategy} for sampling goals not supported!")
 
-        return self._buffer["achieved_goal"][her_episode_indices, transitions_indices]
+        return self._buffer["next_achieved_goal"][her_episode_indices, transitions_indices]
 
     def _sample_transitions(
         self,
@@ -303,14 +290,6 @@ class HerReplayBuffer(DictReplayBuffer):
             her_indices = np.arange(len(episode_indices))
 
         ep_lengths = self.episode_lengths[episode_indices]
-
-        # Special case when using the "future" goal sampling strategy
-        # we cannot sample all transitions, we have to remove the last timestep
-        if self.goal_selection_strategy == GoalSelectionStrategy.FUTURE:
-            # restrict the sampling domain when ep_lengths > 1
-            # otherwise filter out the indices
-            her_indices = her_indices[ep_lengths[her_indices] > 1]
-            ep_lengths[her_indices] -= 1
 
         if online_sampling:
             # Select which transitions to use
@@ -360,21 +339,6 @@ class HerReplayBuffer(DictReplayBuffer):
                 transitions["desired_goal"][her_indices, 0],
                 transitions["info"][her_indices, 0],
             )
-
-        # full_indices = np.arange(batch_size)
-        # transitions["reward"][full_indices, 0] = self.env.env_method(
-        #     "compute_reward",
-        #     # the new state depends on the previous state and action
-        #     # s_{t+1} = f(s_t, a_t)
-        #     # so the next_achieved_goal depends also on the previous state and action
-        #     # because we are in a GoalEnv:
-        #     # r_t = reward(s_t, a_t) = reward(next_achieved_goal, desired_goal)
-        #     # therefore we have to use "next_achieved_goal" and not "achieved_goal"
-        #     transitions["next_achieved_goal"][full_indices, 0],
-        #     # here we use the new desired goal
-        #     transitions["desired_goal"][full_indices, 0],
-        #     transitions["info"][full_indices, 0],
-        # )
 
         # concatenate observation with (desired) goal
         observations = self._normalize_obs(transitions, maybe_vec_env)

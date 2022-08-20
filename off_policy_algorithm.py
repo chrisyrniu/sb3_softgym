@@ -18,18 +18,15 @@ from stable_baselines3.common.save_util import load_from_pkl, save_to_pkl
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, RolloutReturn, Schedule, TrainFreq, TrainFrequencyUnit
 from stable_baselines3.common.utils import safe_mean, should_collect_more_steps
 from stable_baselines3.common.vec_env import VecEnv
-# from stable_baselines3 import HerReplayBuffer
 from her_replay_buffer import HerReplayBuffer
 
 
 class OffPolicyAlgorithm(BaseAlgorithm):
     """
     The base for Off-Policy algorithms (ex: SAC/TD3)
-
     :param policy: Policy object
     :param env: The environment to learn from
                 (if registered in Gym, can be str. Can be None for loading trained models)
-    :param policy_base: The base policy used by this method
     :param learning_rate: learning rate for the optimizer,
         it can be a function of the current progress remaining (from 1 to 0)
     :param buffer_size: size of the replay buffer
@@ -77,7 +74,6 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         self,
         policy: Type[BasePolicy],
         env: Union[GymEnv, str],
-        policy_base: Type[BasePolicy],
         learning_rate: Union[float, Schedule],
         buffer_size: int = 1_000_000,  # 1e6
         learning_starts: int = 100,
@@ -105,10 +101,9 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         supported_action_spaces: Optional[Tuple[gym.spaces.Space, ...]] = None,
     ):
 
-        super(OffPolicyAlgorithm, self).__init__(
+        super().__init__(
             policy=policy,
             env=env,
-            policy_base=policy_base,
             learning_rate=learning_rate,
             policy_kwargs=policy_kwargs,
             tensorboard_log=tensorboard_log,
@@ -161,8 +156,10 @@ class OffPolicyAlgorithm(BaseAlgorithm):
 
             try:
                 train_freq = (train_freq[0], TrainFrequencyUnit(train_freq[1]))
-            except ValueError:
-                raise ValueError(f"The unit of the `train_freq` must be either 'step' or 'episode' not '{train_freq[1]}'!")
+            except ValueError as e:
+                raise ValueError(
+                    f"The unit of the `train_freq` must be either 'step' or 'episode' not '{train_freq[1]}'!"
+                ) from e
 
             if not isinstance(train_freq[0], int):
                 raise ValueError(f"The frequency of `train_freq` must be an integer and not {train_freq[0]}")
@@ -172,6 +169,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
     def _setup_model(self) -> None:
         self._setup_lr_schedule()
         self.set_random_seed(self.seed)
+
         # Use DictReplayBuffer if needed
         if self.replay_buffer_class is None:
             if isinstance(self.observation_space, gym.spaces.Dict):
@@ -227,7 +225,6 @@ class OffPolicyAlgorithm(BaseAlgorithm):
     def save_replay_buffer(self, path: Union[str, pathlib.Path, io.BufferedIOBase]) -> None:
         """
         Save the replay buffer as a pickle file.
-
         :param path: Path to the file where the replay buffer should be saved.
             if path is a str or pathlib.Path, the path is automatically created if necessary.
         """
@@ -241,7 +238,6 @@ class OffPolicyAlgorithm(BaseAlgorithm):
     ) -> None:
         """
         Load a replay buffer from a pickle file.
-
         :param path: Path to the pickled replay buffer.
         :param truncate_last_traj: When using ``HerReplayBuffer`` with online sampling:
             If set to ``True``, we assume that the last trajectory in the replay buffer was finished
@@ -387,7 +383,6 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         This is either done by sampling the probability distribution of the policy,
         or sampling a random action (from a uniform distribution over the action space)
         or by adding noise to the deterministic output.
-
         :param action_noise: Action noise that will be used for exploration
             Required for deterministic policy (e.g. TD3). This can also be used
             in addition to the stochastic policy for SAC.
@@ -466,7 +461,6 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         Store transition in the replay buffer.
         We store the normalized action and the unnormalized observation.
         It also handles terminal observations (because VecEnv resets automatically).
-
         :param replay_buffer: Replay buffer object where to store the transition.
         :param buffer_action: normalized action
         :param new_obs: next observation in the current episode
@@ -530,7 +524,6 @@ class OffPolicyAlgorithm(BaseAlgorithm):
     ) -> RolloutReturn:
         """
         Collect experiences and store them into a ``ReplayBuffer``.
-
         :param env: The training environment
         :param callback: Callback that will be called at each step
             (and at the beginning and end of the rollout)
