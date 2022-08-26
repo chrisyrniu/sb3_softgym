@@ -23,12 +23,14 @@ from softgym.utils.normalized_env import normalize
 from softgym.utils.visualization import save_numpy_as_gif
 import pyflex
 from stable_baselines3.common.utils import set_random_seed
+from eval_checkpoint_callback import EvalCheckpointCallback
 
 
 def make_vec_env(
     env_name: Union[str,Any],
     n_envs: int = 1,
     seed: Optional[int] = None,
+    eval: Optional[bool] = False,
     start_index: int = 0,
     monitor_dir: Optional[str] = None,
     wrapper_class: Optional[Callable[[gym.Env], gym.Env]] = None,
@@ -45,7 +47,10 @@ def make_vec_env(
 
     set_random_seed(seed)
 
-    def make_env(rank):
+    if eval:
+        n_envs = 1
+
+    def make_env(rank, eval):
         def _init():
             env = normalize(SOFTGYM_ENVS[env_name](**env_kwargs))
             if seed is not None:
@@ -53,7 +58,10 @@ def make_vec_env(
                 env.action_space.seed(seed + rank)
             # Wrap the env in a Monitor wrapper
             # to have additional training information
-            monitor_path = os.path.join(monitor_dir, str(rank)) if monitor_dir is not None else None
+            if eval:
+                monitor_path = os.path.join(monitor_dir, "eval_" + str(rank)) if monitor_dir is not None else None
+            else:
+                monitor_path = os.path.join(monitor_dir, str(rank)) if monitor_dir is not None else None
             # Create the monitor folder if needed
             if monitor_path is not None:
                 os.makedirs(monitor_dir, exist_ok=True)
@@ -70,7 +78,7 @@ def make_vec_env(
         # Default: use a DummyVecEnv
         vec_env_cls = DummyVecEnv
 
-    return vec_env_cls([make_env(i + start_index) for i in range(n_envs)], **vec_env_kwargs)
+    return vec_env_cls([make_env(i + start_index, eval) for i in range(n_envs)], **vec_env_kwargs)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
@@ -93,6 +101,10 @@ if __name__ == "__main__":
     parser.add_argument('--log_name', help='the name of the run for TensorBoard logging', type=str, default='SAC')
     parser.add_argument('--save_dir', help='the path to save models', type=str, default='save_dir')
     parser.add_argument('--seed', help='the seed number to use', type=int, default=0)
+    # Evaluate args
+    parser.add_argument('--min_reward', help='minimum reward to save the model', type=int)
+    parser.add_argument('--n_eval_episodes', help='the number of episodes for each evaluation during training', type=int, default=5)
+    parser.add_argument('--eval_freq', help='evaluation frequence of the model', type=int, default=1500)
     # HER args
     parser.add_argument('--her', type=int, default=0, help='Whether to use hindsight experience replay')
     parser.add_argument('--max_episode_length_her', type=int, default=75, help="The maximum length of an episode (only required for using HER)")
@@ -109,11 +121,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if not os.path.exists(args.log_dir):
-        os.makedirs(args.log_dir)
+    log_dir = args.log_dir + '/' + args.log_name + '/'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
     save_dir = args.save_dir + '/' + args.log_name + '/'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+    monitor_file_path = log_dir
+    eval_monitor_file_path = log_dir
 
     env_kwargs = env_arg_dict[args.env_name]
 
@@ -127,25 +142,37 @@ if __name__ == "__main__":
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
 
-    if args.env_name == "LoadWaterGoal" or args.env_name == "LoadWaterGoalHard" or args.env_name == "LoadWater":
-        env_kwargs['curr_start_step'] = args.curr_start_step
-        env_kwargs['curr_end_step'] = args.curr_end_step
-        env_kwargs['curr_start_thresh'] = args.curr_start_thresh
-        env_kwargs['curr_end_thresh'] = args.curr_end_thresh
-    if args.env_name == "LoadWaterAmount" or args.env_name == "LoadWaterAmountHard" or args.env_name == "LoadWater":
+    if args.env_name == "LoadWater":
         env_kwargs['goal_sampling_mode'] = args.goal_sampling_mode
+
+    eval_env_kwargs = env_kwargs.copy()
+    eval_env_kwargs['eval'] = True
 
     if args.n_envs == 1:
         args.vec_env_cls = DummyVecEnv
     else:
         args.vec_env_cls = SubprocVecEnv
-    env = make_vec_env(args.env_name, n_envs=args.n_envs, seed=args.seed, env_kwargs=env_kwargs, vec_env_cls=args.vec_env_cls)
+    env = make_vec_env(args.env_name, 
+                        n_envs=args.n_envs, 
+                        seed=args.seed, 
+                        env_kwargs=env_kwargs, 
+                        vec_env_cls=args.vec_env_cls,
+                        monitor_dir=monitor_file_path)
+    eval_env = make_vec_env(args.env_name,
+                        n_envs=1,
+                        eval=True,
+                        seed=args.seed,
+                        env_kwargs=eval_env_kwargs,
+                        vec_env_cls=DummyVecEnv,
+                        monitor_dir=eval_monitor_file_path)
+    callback = EvalCheckpointCallback(eval_env=eval_env, best_model_save_path=save_dir, n_eval_episodes=args.n_eval_episodes,
+                                    eval_freq=args.eval_freq, minimum_reward=args.min_reward)
     # eval_env = make_vec_env(args.env_name, n_envs=1, seed=args.seed, env_kwargs=env_kwargs, vec_env_cls=DummyVecEnv)
     # eval_callback = EvalCallback(eval_env, best_model_save_path=args.save_dir,
     #                          log_path=args.log_dir, eval_freq=40,
     #                          deterministic=True, render=False)
-    checkpoint_callback = CheckpointCallback(save_freq=10000, save_path=save_dir,
-                                         name_prefix='her_model')
+    # callback = CheckpointCallback(save_freq=10000, save_path=save_dir,
+    #                                      name_prefix='her_model')
 
     if args.her:
         args.policy = "MultiInputPolicy"
@@ -173,8 +200,8 @@ if __name__ == "__main__":
                 learning_starts=args.learning_starts,
                 ent_coef=args.ent_coef,
                 device=args.device,
-                tensorboard_log=args.log_dir,
+                tensorboard_log=log_dir,
                 verbose=1,
                 seed=args.seed)
-    model.learn(total_timesteps=args.training_steps, log_interval=args.log_interval, tb_log_name=args.log_name, callback=checkpoint_callback)
+    model.learn(total_timesteps=args.training_steps, log_interval=args.log_interval, tb_log_name=args.log_name, callback=callback)
     model.save(path=save_dir+'model')
