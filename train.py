@@ -32,6 +32,7 @@ def make_vec_env(
     seed: Optional[int] = None,
     eval: Optional[bool] = False,
     start_index: int = 0,
+    method_name: str = 'random',
     monitor_dir: Optional[str] = None,
     wrapper_class: Optional[Callable[[gym.Env], gym.Env]] = None,
     env_kwargs: Optional[Dict[str, Any]] = None,
@@ -50,7 +51,7 @@ def make_vec_env(
     if eval:
         n_envs = 1
 
-    def make_env(rank, eval):
+    def make_env(rank, eval, method_name):
         def _init():
             env = normalize(SOFTGYM_ENVS[env_name](**env_kwargs))
             if seed is not None:
@@ -59,9 +60,9 @@ def make_vec_env(
             # Wrap the env in a Monitor wrapper
             # to have additional training information
             if eval:
-                monitor_path = os.path.join(monitor_dir, "eval_" + str(rank)) if monitor_dir is not None else None
+                monitor_path = os.path.join(monitor_dir, method_name + "_eval_" + str(rank)) if monitor_dir is not None else None
             else:
-                monitor_path = os.path.join(monitor_dir, str(rank)) if monitor_dir is not None else None
+                monitor_path = os.path.join(monitor_dir, method_name + "_" + str(rank)) if monitor_dir is not None else None
             # Create the monitor folder if needed
             if monitor_path is not None:
                 os.makedirs(monitor_dir, exist_ok=True)
