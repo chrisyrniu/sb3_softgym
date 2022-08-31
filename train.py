@@ -111,15 +111,20 @@ if __name__ == "__main__":
     parser.add_argument('--goal_selection_strategy', type=str, default='future', help='Strategy for sampling goals for replay (future, final or episode)')
     parser.add_argument('--n_sampled_goal', type=int, default=4, help='Number of virtual transitions to create per real transition, by sampling new goals.')
     parser.add_argument('--online_sampling', type=bool, default=True, help='If new transitions will not be saved in the replay buffer and will only be created at sampling time')
-    # LoadWaterGoal args
-    parser.add_argument('--curr_start_step', type=int, default=0, help='the training step to start curriculum learning')
-    parser.add_argument('--curr_end_step', type=int, default=0, help='the training step to end curriculum learning')
-    parser.add_argument('--curr_start_thresh', type=float, default=0.4, help='the (water amount) threshold to start curriculum learning')
-    parser.add_argument('--curr_end_thresh', type=float, default=0.8, help='the (water amount) threshold to end curriculum learning')
-    # LoadWaterAmount args
-    parser.add_argument('--goal_sampling_mode', type=int, default=0, help='the mode for sampling the targeted amount of water')
+    # Curriculum Learning args
+    parser.add_argument('--curr_mode', type=int, default=0, help='the curriculum learning mode to use (0: no curriculum, 1: base curriculum, 2: designed curriculum)')
 
     args = parser.parse_args()
+
+    if her:
+        if curr_mode == 0:
+            method_name = "sac_her"
+        elif curr_mode == 1:
+            method_name = "sac_her_vanilla_curr"
+        else:
+            method_name = "sac_her_curr"
+    else:
+        method_name = "sac"
 
     log_dir = args.log_dir + '/' + args.log_name + '/'
     if not os.path.exists(log_dir):
@@ -142,9 +147,6 @@ if __name__ == "__main__":
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
 
-    if args.env_name == "LoadWater":
-        env_kwargs['goal_sampling_mode'] = args.goal_sampling_mode
-
     eval_env_kwargs = env_kwargs.copy()
     eval_env_kwargs['eval'] = True
 
@@ -157,14 +159,16 @@ if __name__ == "__main__":
                         seed=args.seed, 
                         env_kwargs=env_kwargs, 
                         vec_env_cls=args.vec_env_cls,
-                        monitor_dir=monitor_file_path)
+                        monitor_dir=monitor_file_path,
+                        method=method_name)
     eval_env = make_vec_env(args.env_name,
                         n_envs=1,
                         eval=True,
                         seed=args.seed,
                         env_kwargs=eval_env_kwargs,
                         vec_env_cls=DummyVecEnv,
-                        monitor_dir=eval_monitor_file_path)
+                        monitor_dir=eval_monitor_file_path,
+                        method=method_name)
     callback = EvalCheckpointCallback(eval_env=eval_env, best_model_save_path=save_dir, n_eval_episodes=args.n_eval_episodes,
                                     eval_freq=args.eval_freq, minimum_reward=args.min_reward)
     # eval_env = make_vec_env(args.env_name, n_envs=1, seed=args.seed, env_kwargs=env_kwargs, vec_env_cls=DummyVecEnv)
