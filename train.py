@@ -125,7 +125,12 @@ if __name__ == "__main__":
         else:
             method_name = "sac_her_curr"
     else:
-        method_name = "sac"
+        if args.curr_mode == 0:
+            method_name = "sac"
+        elif args.curr_mode == 1:
+            method_name = "sac_vanilla_curr"
+        else:
+            method_name = "sac_curr"
 
     log_dir = args.log_dir + '/' + args.log_name + '/'
     if not os.path.exists(log_dir):
@@ -144,7 +149,7 @@ if __name__ == "__main__":
     env_kwargs['num_variations'] = args.num_variations
     env_kwargs['render'] = True
     env_kwargs['headless'] = args.headless
-    env_kwargs['method'] = method_name
+    env_kwargs['curr_mode'] = args.curr_mode
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')

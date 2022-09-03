@@ -2,11 +2,11 @@ export OMP_NUM_THREADS=1
 
 python -u train.py \
   --env_name LoadWater \
-  --her 1 \
-  --curr_mode 2 \
+  --her 0 \
+  --curr_mode 0 \
   --n_envs 1 \
   --headless 1 \
-  --num_variations 10 \
+  --num_variations 2 \
   --training_steps 1000000 \
   --learning_rate 0.0003 \
   --train_freq 1 \
