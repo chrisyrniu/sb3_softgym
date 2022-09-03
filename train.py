@@ -32,7 +32,7 @@ def make_vec_env(
     seed: Optional[int] = None,
     eval: Optional[bool] = False,
     start_index: int = 0,
-    method_name: str = 'random',
+    method: str = 'random',
     monitor_dir: Optional[str] = None,
     wrapper_class: Optional[Callable[[gym.Env], gym.Env]] = None,
     env_kwargs: Optional[Dict[str, Any]] = None,
@@ -51,7 +51,7 @@ def make_vec_env(
     if eval:
         n_envs = 1
 
-    def make_env(rank, eval, method_name):
+    def make_env(rank, eval, method):
         def _init():
             env = normalize(SOFTGYM_ENVS[env_name](**env_kwargs))
             if seed is not None:
@@ -79,7 +79,7 @@ def make_vec_env(
         # Default: use a DummyVecEnv
         vec_env_cls = DummyVecEnv
 
-    return vec_env_cls([make_env(i + start_index, eval) for i in range(n_envs)], **vec_env_kwargs)
+    return vec_env_cls([make_env(i + start_index, eval, method) for i in range(n_envs)], **vec_env_kwargs)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
@@ -117,10 +117,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if her:
-        if curr_mode == 0:
+    if args.her:
+        if args.curr_mode == 0:
             method_name = "sac_her"
-        elif curr_mode == 1:
+        elif args.curr_mode == 1:
             method_name = "sac_her_vanilla_curr"
         else:
             method_name = "sac_her_curr"
@@ -144,6 +144,7 @@ if __name__ == "__main__":
     env_kwargs['num_variations'] = args.num_variations
     env_kwargs['render'] = True
     env_kwargs['headless'] = args.headless
+    env_kwargs['method'] = method_name
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
@@ -172,12 +173,6 @@ if __name__ == "__main__":
                         method=method_name)
     callback = EvalCheckpointCallback(eval_env=eval_env, best_model_save_path=save_dir, n_eval_episodes=args.n_eval_episodes,
                                     eval_freq=args.eval_freq, minimum_reward=args.min_reward)
-    # eval_env = make_vec_env(args.env_name, n_envs=1, seed=args.seed, env_kwargs=env_kwargs, vec_env_cls=DummyVecEnv)
-    # eval_callback = EvalCallback(eval_env, best_model_save_path=args.save_dir,
-    #                          log_path=args.log_dir, eval_freq=40,
-    #                          deterministic=True, render=False)
-    # callback = CheckpointCallback(save_freq=10000, save_path=save_dir,
-    #                                      name_prefix='her_model')
 
     if args.her:
         args.policy = "MultiInputPolicy"

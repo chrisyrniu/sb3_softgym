@@ -3,6 +3,7 @@ export OMP_NUM_THREADS=1
 python -u train.py \
   --env_name LoadWater \
   --her 1 \
+  --curr_mode 2 \
   --n_envs 1 \
   --headless 1 \
   --num_variations 10 \
@@ -13,10 +14,6 @@ python -u train.py \
   --buffer_size 1000000 \
   --batch_size 256 \
   --learning_starts 100 \
-  --curr_start_step 150000 \
-  --curr_end_step 650000 \
-  --curr_start_thresh 0.4 \
-  --curr_end_thresh 0.95 \
   --device cuda \
   --max_episode_length_her 75 \
   --goal_selection_strategy future \
