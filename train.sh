@@ -21,8 +21,8 @@ python -u train.py \
   --online_sampling True \
   --log_interval 20 \
   --log_dir log_dir \
-  --log_name test_seed0 \
-  --min_reward -20 \
+  --log_name plot_test \
+  --min_reward -70 \
   --n_eval_episodes 10 \
   --eval_freq 3000 \
   --save_dir save_dir \

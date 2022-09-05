@@ -23,6 +23,8 @@ class EvalCheckpointCallback(EvalCallback):
         render: bool = False,
         verbose: int = 1,
         warn: bool = True,
+        method_name: str = 'random',
+        seed: int = 0
     ):
         super(EvalCheckpointCallback, self).__init__(eval_env=eval_env,
                                                    callback_on_new_best=callback_on_new_best,
@@ -35,6 +37,8 @@ class EvalCheckpointCallback(EvalCallback):
                                                    warn=warn,
                                                    verbose=verbose)
         self.minimum_reward = minimum_reward
+        self.method_name = method_name
+        self.seed = seed
 
     def _on_step(self) -> bool:
 
@@ -96,13 +100,13 @@ class EvalCheckpointCallback(EvalCallback):
                 if self.verbose > 0:
                     print("New best mean reward!")
                 if self.best_model_save_path is not None:
-                    self.model.save(os.path.join(self.best_model_save_path, "best_model"))
+                    self.model.save(os.path.join(self.best_model_save_path, f"{self.method_name}_seed{self.seed}_best_model"))
                 self.best_mean_reward = mean_reward
                 # Trigger callback if needed
                 if self.callback is not None:
                     return self._on_event()
             if mean_reward > self.minimum_reward:
                 if self.best_model_save_path is not None:
-                    self.model.save(os.path.join(self.best_model_save_path, f"callback_{self.n_calls}"))
+                    self.model.save(os.path.join(self.best_model_save_path, f"{self.method_name}_seed{self.seed}_callback_{self.n_calls}"))
 
         return True

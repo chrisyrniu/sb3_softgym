@@ -51,7 +51,7 @@ def make_vec_env(
     if eval:
         n_envs = 1
 
-    def make_env(rank, eval, method):
+    def make_env(rank, eval, method, seed):
         def _init():
             env = normalize(SOFTGYM_ENVS[env_name](**env_kwargs))
             if seed is not None:
@@ -60,9 +60,9 @@ def make_vec_env(
             # Wrap the env in a Monitor wrapper
             # to have additional training information
             if eval:
-                monitor_path = os.path.join(monitor_dir, method_name + "_eval_" + str(rank)) if monitor_dir is not None else None
+                monitor_path = os.path.join(monitor_dir, f"{method_name}_seed{seed}_eval_" + str(rank)) if monitor_dir is not None else None
             else:
-                monitor_path = os.path.join(monitor_dir, method_name + "_" + str(rank)) if monitor_dir is not None else None
+                monitor_path = os.path.join(monitor_dir, f"{method_name}_seed{seed}_train_" + str(rank)) if monitor_dir is not None else None
             # Create the monitor folder if needed
             if monitor_path is not None:
                 os.makedirs(monitor_dir, exist_ok=True)
@@ -79,7 +79,7 @@ def make_vec_env(
         # Default: use a DummyVecEnv
         vec_env_cls = DummyVecEnv
 
-    return vec_env_cls([make_env(i + start_index, eval, method) for i in range(n_envs)], **vec_env_kwargs)
+    return vec_env_cls([make_env(i + start_index, eval, method, seed) for i in range(n_envs)], **vec_env_kwargs)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
@@ -177,7 +177,7 @@ if __name__ == "__main__":
                         monitor_dir=eval_monitor_file_path,
                         method=method_name)
     callback = EvalCheckpointCallback(eval_env=eval_env, best_model_save_path=save_dir, n_eval_episodes=args.n_eval_episodes,
-                                    eval_freq=args.eval_freq, minimum_reward=args.min_reward)
+                                    eval_freq=args.eval_freq, minimum_reward=args.min_reward, method_name=method_name, seed=args.seed)
 
     if args.her:
         args.policy = "MultiInputPolicy"

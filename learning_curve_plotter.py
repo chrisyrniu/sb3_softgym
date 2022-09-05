@@ -21,15 +21,16 @@ import pandas as pd
 class Learning_Curve_Plotter(object):
     def __init__(self,
                  log_dir,
-                 eval_freq=1500,
-                 n_eval_episodes=5,
+                 eval_freq=3000,
+                 n_eval_episodes=10,
                  eval_smooth_window_size=10,
-                 non_eval_sample_freq=2000,
+                 non_eval_sample_freq=1500,
                  non_eval_smooth_window_size=1,
                  method_names=None,
                  env_name='random',
                  show_legend=False) -> None:
         self.log_dir = log_dir
+        print('dir', self.log_dir)
         self.eval_freq = eval_freq
         self.n_eval_episodes = n_eval_episodes
         self.eval_smooth_window_size = eval_smooth_window_size
@@ -40,6 +41,8 @@ class Learning_Curve_Plotter(object):
         
         if method_names == None:
             self.method_names = {'SAC': 'sac',
+                                 'SAC+Vanilla Curriculum': 'sac_vanilla_curr', 
+                                 'SAC+Designed Curriculum': 'sac_curr',
                                  'SAC+HER': 'sac_her',
                                  'SAC+HER+Vanilla Curriculum': 'sac_her_vanilla_curr', 
                                  'SAC+HER+Designed Curriculum': 'sac_her_curr'}
@@ -82,11 +85,15 @@ class Learning_Curve_Plotter(object):
         else:
             legend_flag = False
         hue_order = ['SAC',
+                     'SAC+Vanilla Curriculum',
+                     'SAC+Designed Curriculum',
                      'SAC+HER',
                      'SAC+HER+Vanilla Curriculum',
                      'SAC+HER+Designed Curriculum']
         hue_order.reverse()
-        color_map = {'SAC': 'skyblue',
+        color_map = {'SAC': 'grey',
+                     'SAC+Vanilla Curriculum': 'skyblue', 
+                     'SAC+Designed Curriculum': 'blue',
                      'SAC+HER': 'brown',
                      'SAC+HER+Vanilla Curriculum': 'gold', 
                      'SAC+HER+Designed Curriculum': 'red'}
@@ -112,11 +119,15 @@ class Learning_Curve_Plotter(object):
         else:
             legend_flag = False
         hue_order = ['SAC',
+                     'SAC+Vanilla Curriculum',
+                     'SAC+Designed Curriculum',
                      'SAC+HER',
                      'SAC+HER+Vanilla Curriculum',
                      'SAC+HER+Designed Curriculum']
         hue_order.reverse()
-        color_map = {'SAC': 'skyblue',
+        color_map = {'SAC': 'grey',
+                     'SAC+Vanilla Curriculum': 'skyblue', 
+                     'SAC+Designed Curriculum': 'blue',
                      'SAC+HER': 'brown',
                      'SAC+HER+Vanilla Curriculum': 'gold', 
                      'SAC+HER+Designed Curriculum': 'red'}
@@ -198,9 +209,9 @@ class Learning_Curve_Plotter(object):
         
 
     def get_monitor_files(self, path, method_name, eval=False) -> List[str]:
-        eval_files = glob(os.path.join(path, '*' + 'eval' + '*' + method_name + '*' + 'monitor.csv'))
-        all_files = glob(os.path.join(path, '*' + method_name + '*' + 'monitor.csv'))
-        non_eval_files = list(set(all_files) - set(eval_files))
+        eval_files = glob(os.path.join(path, method_name + '_seed' + '*' + '_eval_' + '*' + 'monitor.csv'))
+        non_eval_files = glob(os.path.join(path, method_name + '_seed' + '*' + '_train_' + '*' + 'monitor.csv'))
+        print("file", non_eval_files)
         
         if eval:
             ret = eval_files
