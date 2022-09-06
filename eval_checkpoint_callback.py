@@ -17,7 +17,7 @@ class EvalCheckpointCallback(EvalCallback):
         n_eval_episodes: int = 5,
         eval_freq: int = 10000,
         log_path: str = None,
-        minimum_reward: int = -20,
+        minimum_reward: float = -20,
         best_model_save_path: str = None,
         deterministic: bool = True,
         render: bool = False,

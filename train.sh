@@ -2,8 +2,8 @@ export OMP_NUM_THREADS=1
 
 python -u train.py \
   --env_name LoadWater \
-  --her 0 \
-  --curr_mode 0 \
+  --her 1 \
+  --curr_mode 2 \
   --n_envs 1 \
   --headless 1 \
   --num_variations 2 \
@@ -22,7 +22,7 @@ python -u train.py \
   --log_interval 20 \
   --log_dir log_dir \
   --log_name plot_test \
-  --min_reward -70 \
+  --min_reward -20 \
   --n_eval_episodes 10 \
   --eval_freq 3000 \
   --save_dir save_dir \

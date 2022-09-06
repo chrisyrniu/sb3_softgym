@@ -103,7 +103,7 @@ if __name__ == "__main__":
     parser.add_argument('--save_dir', help='the path to save models', type=str, default='save_dir')
     parser.add_argument('--seed', help='the seed number to use', type=int, default=0)
     # Evaluate args
-    parser.add_argument('--min_reward', help='minimum reward to save the model', type=int)
+    parser.add_argument('--min_reward', help='minimum reward to save the model', type=float)
     parser.add_argument('--n_eval_episodes', help='the number of episodes for each evaluation during training', type=int, default=5)
     parser.add_argument('--eval_freq', help='evaluation frequence of the model', type=int, default=1500)
     # HER args
