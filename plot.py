@@ -8,7 +8,7 @@ if __name__ == "__main__":
     parser.add_argument('--n_eval_episodes', help='the number of episodes for each evaluation during training', type=int, default=10)
     parser.add_argument('--eval_smooth_window_size', help='the sliding window size to smooth the evaluation rewards', type=int, default=1)
     parser.add_argument('--non_eval_sample_freq', help='the sample frequence of the rollout rewards for plotting ', type=int, default=1500)
-    parser.add_argument('--non_eval_smooth_window_size', help='the sliding window size to smooth the sampled rollout rewards', type=int, default=1)
+    parser.add_argument('--non_eval_smooth_window_size', help='the sliding window size to smooth the sampled rollout rewards', type=int, default=10)
     parser.add_argument('--env_name', help='the environment name of the raw data', type=str, default='load_water')
     parser.add_argument('--show_legend', help='if show the legend in the figure', action='store_true', default=True)
     
