@@ -30,7 +30,6 @@ class Learning_Curve_Plotter(object):
                  env_name='random',
                  show_legend=False) -> None:
         self.log_dir = log_dir
-        print('dir', self.log_dir)
         self.eval_freq = eval_freq
         self.n_eval_episodes = n_eval_episodes
         self.eval_smooth_window_size = eval_smooth_window_size
@@ -211,7 +210,6 @@ class Learning_Curve_Plotter(object):
     def get_monitor_files(self, path, method_name, eval=False) -> List[str]:
         eval_files = glob(os.path.join(path, method_name + '_seed' + '*' + '_eval_' + '*' + 'monitor.csv'))
         non_eval_files = glob(os.path.join(path, method_name + '_seed' + '*' + '_train_' + '*' + 'monitor.csv'))
-        print("file", non_eval_files)
         
         if eval:
             ret = eval_files

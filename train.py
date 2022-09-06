@@ -144,17 +144,19 @@ if __name__ == "__main__":
     env_kwargs = env_arg_dict[args.env_name]
 
     # Generate and save the initial states for running this environment for the first time
-    env_kwargs['use_cached_states'] = False
-    env_kwargs['save_cached_states'] = False
+    env_kwargs['use_cached_states'] = True
+    env_kwargs['save_cached_states'] = True
     env_kwargs['num_variations'] = args.num_variations
     env_kwargs['render'] = True
     env_kwargs['headless'] = args.headless
     env_kwargs['curr_mode'] = args.curr_mode
+    env_kwargs['eval'] = False
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
 
     eval_env_kwargs = env_kwargs.copy()
+    # eval_env_kwargs['use_cached_states'] = True
     eval_env_kwargs['eval'] = True
 
     if args.n_envs == 1:
