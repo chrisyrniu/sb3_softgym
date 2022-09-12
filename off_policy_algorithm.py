@@ -18,6 +18,7 @@ from stable_baselines3.common.save_util import load_from_pkl, save_to_pkl
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, RolloutReturn, Schedule, TrainFreq, TrainFrequencyUnit
 from stable_baselines3.common.utils import safe_mean, should_collect_more_steps
 from stable_baselines3.common.vec_env import VecEnv
+# from stable_baselines3 import HerReplayBuffer
 from her_replay_buffer import HerReplayBuffer
 
 
@@ -27,6 +28,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
     :param policy: Policy object
     :param env: The environment to learn from
                 (if registered in Gym, can be str. Can be None for loading trained models)
+    :param policy_base: The base policy used by this method
     :param learning_rate: learning rate for the optimizer,
         it can be a function of the current progress remaining (from 1 to 0)
     :param buffer_size: size of the replay buffer
@@ -74,6 +76,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         self,
         policy: Type[BasePolicy],
         env: Union[GymEnv, str],
+        policy_base: Type[BasePolicy],
         learning_rate: Union[float, Schedule],
         buffer_size: int = 1_000_000,  # 1e6
         learning_starts: int = 100,
@@ -101,9 +104,10 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         supported_action_spaces: Optional[Tuple[gym.spaces.Space, ...]] = None,
     ):
 
-        super().__init__(
+        super(OffPolicyAlgorithm, self).__init__(
             policy=policy,
             env=env,
+            policy_base=policy_base,
             learning_rate=learning_rate,
             policy_kwargs=policy_kwargs,
             tensorboard_log=tensorboard_log,
@@ -156,10 +160,8 @@ class OffPolicyAlgorithm(BaseAlgorithm):
 
             try:
                 train_freq = (train_freq[0], TrainFrequencyUnit(train_freq[1]))
-            except ValueError as e:
-                raise ValueError(
-                    f"The unit of the `train_freq` must be either 'step' or 'episode' not '{train_freq[1]}'!"
-                ) from e
+            except ValueError:
+                raise ValueError(f"The unit of the `train_freq` must be either 'step' or 'episode' not '{train_freq[1]}'!")
 
             if not isinstance(train_freq[0], int):
                 raise ValueError(f"The frequency of `train_freq` must be an integer and not {train_freq[0]}")
@@ -169,7 +171,6 @@ class OffPolicyAlgorithm(BaseAlgorithm):
     def _setup_model(self) -> None:
         self._setup_lr_schedule()
         self.set_random_seed(self.seed)
-
         # Use DictReplayBuffer if needed
         if self.replay_buffer_class is None:
             if isinstance(self.observation_space, gym.spaces.Dict):
