@@ -100,7 +100,7 @@ class Learning_Curve_Plotter(object):
         plt.xlabel('Time Step (k)')
         plt.ylabel('Reward')
         if self.show_legend:
-            plt.legend(title=None, ncol=1, fontsize=6)
+            plt.legend(title=None, ncol=1, fontsize=10)
         plt.savefig(f'{self.env_name}_rollout_reward_curves.png', bbox_inches='tight')
         plt.close()        
         return
@@ -134,7 +134,7 @@ class Learning_Curve_Plotter(object):
         plt.xlabel('Time Step (k)')
         plt.ylabel('Reward')
         if self.show_legend:
-            plt.legend(title=None, ncol=1, fontsize=6)
+            plt.legend(title=None, ncol=1, fontsize=10)
         plt.savefig(f'{self.env_name}_eval_reward_curves.png', bbox_inches='tight')
         plt.close()
         

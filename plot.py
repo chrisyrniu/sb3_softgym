@@ -6,7 +6,7 @@ if __name__ == "__main__":
     parser.add_argument('--log_dir', help='the path to the data', type=str, default='results')
     parser.add_argument('--eval_freq', help='evaluation frequence used during training', type=int, default=3000)
     parser.add_argument('--n_eval_episodes', help='the number of episodes for each evaluation during training', type=int, default=10)
-    parser.add_argument('--eval_smooth_window_size', help='the sliding window size to smooth the evaluation rewards', type=int, default=1)
+    parser.add_argument('--eval_smooth_window_size', help='the sliding window size to smooth the evaluation rewards', type=int, default=10)
     parser.add_argument('--non_eval_sample_freq', help='the sample frequence of the rollout rewards for plotting ', type=int, default=1500)
     parser.add_argument('--non_eval_smooth_window_size', help='the sliding window size to smooth the sampled rollout rewards', type=int, default=10)
     parser.add_argument('--env_name', help='the environment name of the raw data', type=str, default='load_water')
