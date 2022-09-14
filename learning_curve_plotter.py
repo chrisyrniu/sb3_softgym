@@ -28,7 +28,8 @@ class Learning_Curve_Plotter(object):
                  non_eval_smooth_window_size=1,
                  method_names=None,
                  env_name='random',
-                 show_legend=False) -> None:
+                 show_legend=False,
+                 n_steps=100000) -> None:
         self.log_dir = log_dir
         self.eval_freq = eval_freq
         self.n_eval_episodes = n_eval_episodes
@@ -37,6 +38,7 @@ class Learning_Curve_Plotter(object):
         self.non_eval_smooth_window_size = non_eval_smooth_window_size
         self.env_name = env_name
         self.show_legend = show_legend
+        self.n_steps = n_steps
         
         if method_names == None:
             self.method_names = {'SAC': 'sac',
@@ -99,6 +101,7 @@ class Learning_Curve_Plotter(object):
         sns.lineplot(data=self.non_eval_data, x="timesteps", y="rollout_rewards_mean", hue="method", ci=68, hue_order=hue_order, legend=legend_flag, palette=color_map)
         plt.xlabel('Time Step (k)')
         plt.ylabel('Reward')
+        plt.xlim(0, self.n_steps/1000)
         if self.show_legend:
             plt.legend(title=None, ncol=1, fontsize=10)
         plt.savefig(f'{self.env_name}_rollout_reward_curves.png', bbox_inches='tight')
@@ -133,6 +136,7 @@ class Learning_Curve_Plotter(object):
         sns.lineplot(data=self.eval_data, x="eval_timesteps", y="eval_rewards_mean", hue="method", ci=68, hue_order=hue_order, legend=legend_flag, palette=color_map)
         plt.xlabel('Time Step (k)')
         plt.ylabel('Reward')
+        plt.xlim(0, self.n_steps/1000)
         if self.show_legend:
             plt.legend(title=None, ncol=1, fontsize=10)
         plt.savefig(f'{self.env_name}_eval_reward_curves.png', bbox_inches='tight')

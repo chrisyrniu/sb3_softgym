@@ -11,6 +11,7 @@ if __name__ == "__main__":
     parser.add_argument('--non_eval_smooth_window_size', help='the sliding window size to smooth the sampled rollout rewards', type=int, default=10)
     parser.add_argument('--env_name', help='the environment name of the raw data', type=str, default='load_water')
     parser.add_argument('--show_legend', help='if show the legend in the figure', action='store_true', default=True)
+    parser.add_argument('--n_steps', help='number of steps to plot', type=int, default=1000000)
     
 
     args = parser.parse_args()
@@ -21,6 +22,7 @@ if __name__ == "__main__":
                                      non_eval_sample_freq=args.non_eval_sample_freq,
                                      non_eval_smooth_window_size=args.non_eval_smooth_window_size,
                                      env_name=args.env_name,
-                                     show_legend=args.show_legend)
+                                     show_legend=args.show_legend,
+                                     n_steps=args.n_steps)
     plotter.process_data()
     plotter.plot()
