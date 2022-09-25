@@ -114,6 +114,10 @@ if __name__ == "__main__":
     parser.add_argument('--online_sampling', type=bool, default=True, help='If new transitions will not be saved in the replay buffer and will only be created at sampling time')
     # Curriculum Learning args
     parser.add_argument('--curr_mode', type=int, default=0, help='the curriculum learning mode to use (0: no curriculum, 1: base curriculum, 2: designed curriculum)')
+    parser.add_argument('--curr_start', type=int, default=250000, help='the step to start the curriculum')
+    parser.add_argument('--curr_end', type=int, default=650000, help='the step to end    the curriculum')   
+    # Env args
+    parser.add_argument('--loader_name', type=str, default='bowl', help='the type of the loader (bowl|bucket)')
 
     args = parser.parse_args()
 
@@ -151,6 +155,9 @@ if __name__ == "__main__":
     env_kwargs['headless'] = args.headless
     env_kwargs['curr_mode'] = args.curr_mode
     env_kwargs['eval'] = False
+    env_kwargs['loader_name'] = args.loader_name
+    env_kwargs['curr_start'] = args.curr_start
+    env_kwargs['curr_end'] = args.curr_end
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')

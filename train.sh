@@ -2,12 +2,15 @@ export OMP_NUM_THREADS=1
 
 python -u train.py \
   --env_name LoadWater \
+  --loader_name bucket \
   --her 1 \
   --curr_mode 2 \
+  --curr_start 300000 \
+  --curr_end 1000000 \
   --n_envs 1 \
   --headless 1 \
   --num_variations 1000 \
-  --training_steps 1000000 \
+  --training_steps 1500000 \
   --learning_rate 0.0003 \
   --train_freq 1 \
   --grad_steps 1 \
@@ -21,7 +24,7 @@ python -u train.py \
   --online_sampling True \
   --log_interval 20 \
   --log_dir log_dir \
-  --log_name sac_her_curr_seed0 \
+  --log_name bucket_sac_her_curr_30_100_seed0 \
   --min_reward -40 \
   --n_eval_episodes 10 \
   --eval_freq 3000 \
