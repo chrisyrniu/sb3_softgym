@@ -30,6 +30,8 @@ if __name__ == "__main__":
     parser.add_argument('--img_size', type=int, default=720, help='Size of the recorded videos')
     parser.add_argument('--save_video', type=int, default=1, help='if save the video')
     parser.add_argument('--save_video_dir', type=str, default='save_dir', help='Path to the saved video')
+    # Env args
+    parser.add_argument('--loader_name', type=str, default='bowl', help='the type of the loader (bowl|bucket)')
 
     args = parser.parse_args()
 
@@ -43,6 +45,7 @@ if __name__ == "__main__":
     env_kwargs['headless'] = args.headless
     env_kwargs['curr_mode'] = 0
     env_kwargs['eval'] = False
+    env_kwargs['loader_name'] = args.loader_name
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
