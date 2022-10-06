@@ -112,6 +112,8 @@ if __name__ == "__main__":
     parser.add_argument('--goal_selection_strategy', type=str, default='future', help='Strategy for sampling goals for replay (future, final or episode)')
     parser.add_argument('--n_sampled_goal', type=int, default=4, help='Number of virtual transitions to create per real transition, by sampling new goals.')
     parser.add_argument('--online_sampling', type=bool, default=True, help='If new transitions will not be saved in the replay buffer and will only be created at sampling time')
+    parser.add_argument('--water_amount_goal', type=float, default=0.60, help='The water amount goal')
+    parser.add_argument('--multi_amount_goals', action='store_true', help='If set multiple water amount goals')
     # Curriculum Learning args
     parser.add_argument('--curr_mode', type=int, default=0, help='the curriculum learning mode to use (0: no curriculum, 1: base curriculum, 2: designed curriculum)')
     parser.add_argument('--curr_start', type=int, default=250000, help='the step to start the curriculum')
@@ -158,6 +160,8 @@ if __name__ == "__main__":
     env_kwargs['loader_name'] = args.loader_name
     env_kwargs['curr_start'] = args.curr_start
     env_kwargs['curr_end'] = args.curr_end
+    env_kwargs['water_amount_goal'] = args.water_amount_goal
+    env_kwargs['multi_amount_goals'] = args.multi_amount_goals
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
