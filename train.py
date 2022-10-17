@@ -83,11 +83,13 @@ def make_vec_env(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
-    # ['PassWater', 'PourWater', 'PourWaterAmount', 'RopeFlatten', 'ClothFold', 'ClothFlatten', 'ClothDrop', 'ClothFoldCrumpled', 'ClothFoldDrop', 'RopeConfiguration']
+    # Env args
+    parser.add_argument('--loader_name', type=str, default='bowl', help='the type of the loader (bowl|bucket)')
     parser.add_argument('--env_name', type=str, default='DistributeWater')
     parser.add_argument('--n_envs', help='the number of environments in parallel', type=int, default=1)
     parser.add_argument('--headless', type=int, default=1, help='Whether to run the environment with headless rendering')
     parser.add_argument('--num_variations', type=int, default=1, help='Number of environment variations to be generated')
+    # Train args
     parser.add_argument('--training_steps', type=int, default=50000, help='Number of total timesteps of training')
     parser.add_argument('--train_freq', type=int, default=1, help='Update (call the train function) the model every train_freq steps (train_freq*n if do multi-processing)')
     parser.add_argument('--grad_steps', type=int, default=1, help='How many gradient steps to do for each train function call (after each rollout and it can only rollout one step at a time)')
@@ -113,13 +115,13 @@ if __name__ == "__main__":
     parser.add_argument('--n_sampled_goal', type=int, default=4, help='Number of virtual transitions to create per real transition, by sampling new goals.')
     parser.add_argument('--online_sampling', type=bool, default=True, help='If new transitions will not be saved in the replay buffer and will only be created at sampling time')
     parser.add_argument('--water_amount_goal', type=float, default=0.60, help='The water amount goal')
-    parser.add_argument('--multi_amount_goals', action='store_true', help='If set multiple water amount goals')
+    parser.add_argument('--multi_amount_goals', type=int, default=0, choices=[0, 1, 2], help='The type of setting multiple water amount goals (0 for none, 1 for discrete values, 2 for a continuous range)')
     # Curriculum Learning args
     parser.add_argument('--curr_mode', type=int, default=0, help='the curriculum learning mode to use (0: no curriculum, 1: base curriculum, 2: designed curriculum)')
     parser.add_argument('--curr_start', type=int, default=250000, help='the step to start the curriculum')
-    parser.add_argument('--curr_end', type=int, default=650000, help='the step to end    the curriculum')   
-    # Env args
-    parser.add_argument('--loader_name', type=str, default='bowl', help='the type of the loader (bowl|bucket)')
+    parser.add_argument('--curr_end', type=int, default=650000, help='the step to end the curriculum')
+    parser.add_argument('--virtual_water_amount_goal', type=float, default=0.0, help='the single virtual water amount goal for curriculum learning')
+
 
     args = parser.parse_args()
 
@@ -162,6 +164,7 @@ if __name__ == "__main__":
     env_kwargs['curr_end'] = args.curr_end
     env_kwargs['water_amount_goal'] = args.water_amount_goal
     env_kwargs['multi_amount_goals'] = args.multi_amount_goals
+    env_kwargs['virtual_water_amount_goal'] = args.virtual_water_amount_goal
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
