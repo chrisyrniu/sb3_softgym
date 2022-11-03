@@ -89,8 +89,9 @@ if __name__ == "__main__":
     parser.add_argument('--n_envs', help='the number of environments in parallel', type=int, default=1)
     parser.add_argument('--headless', type=int, default=1, help='Whether to run the environment with headless rendering')
     parser.add_argument('--num_variations', type=int, default=1, help='Number of environment variations to be generated')
-    parser.add_argument('--achieved_amount_goal_zero_mask', action='store_true', default=False, 
-                        help='When the the water amount goal is larger than 0, the reward will be -1 if the achieved amount is 0')
+    # parser.add_argument('--achieved_amount_goal_zero_mask', action='store_true', default=False, 
+    #                     help='When the the water amount goal is larger than 0, the reward will be -1 if the achieved amount is 0')
+    parser.add_argument('--achieved_amount_zero_reward_coeff', type=float, default=1.0)
     # Train args
     parser.add_argument('--training_steps', type=int, default=50000, help='Number of total timesteps of training')
     parser.add_argument('--train_freq', type=int, default=1, help='Update (call the train function) the model every train_freq steps (train_freq*n if do multi-processing)')
@@ -167,7 +168,7 @@ if __name__ == "__main__":
     env_kwargs['water_amount_goal'] = args.water_amount_goal
     env_kwargs['multi_amount_goals'] = args.multi_amount_goals
     env_kwargs['virtual_water_amount_goal'] = args.virtual_water_amount_goal
-    env_kwargs['achieved_amount_goal_zero_mask'] = args.achieved_amount_goal_zero_mask
+    env_kwargs['achieved_amount_zero_reward_coeff'] = args.achieved_amount_zero_reward_coeff
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
