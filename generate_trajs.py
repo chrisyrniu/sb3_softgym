@@ -81,6 +81,7 @@ if __name__ == "__main__":
     loader_poss = []
     loader_vels = []
     loader_rots = []
+    loader_rot_vels = []
     in_loader_percents = []
     waterlines = []
     targeted_poss = []
@@ -98,6 +99,7 @@ if __name__ == "__main__":
         loader_pos = []
         loader_vel = []
         loader_rot = []
+        loader_rot_vel = []
         in_loader_percent = []
         waterline = []
         targeted_pos = []
@@ -109,8 +111,9 @@ if __name__ == "__main__":
             loader_pos.append(obs['observation'][:3])
             loader_vel.append(obs['observation'][4:7])
             loader_rot.append([obs['observation'][3]])
-            in_loader_percent.append([obs['observation'][7]])
-            waterline.append([obs['observation'][8]])
+            loader_rot_vel.append(obs['observation'][7])
+            in_loader_percent.append([obs['observation'][8]])
+            waterline.append([obs['observation'][9]])
             targeted_pos.append(obs['desired_goal'][:3])
             targeted_water_amount.append([obs['desired_goal'][3]])
 
@@ -125,6 +128,7 @@ if __name__ == "__main__":
         loader_pos = np.stack(loader_pos)
         loader_vel = np.stack(loader_vel)
         loader_rot = np.stack(loader_rot)
+        loader_rot_vel = np.stack(loader_rot_vel)
         in_loader_percent = np.stack(in_loader_percent)
         waterline = np.stack(waterline)
         targted_pos = np.stack(targeted_pos)
@@ -134,6 +138,7 @@ if __name__ == "__main__":
         loader_poss.append(loader_pos)
         loader_vels.append(loader_vel)
         loader_rots.append(loader_rot)
+        loader_rot_vels.append(loader_rot_vel)
         in_loader_percents.append(in_loader_percent)
         waterlines.append(waterline)
         targeted_poss.append(targeted_pos)
@@ -143,6 +148,7 @@ if __name__ == "__main__":
     loader_poss = np.stack(loader_poss)
     loader_vels = np.stack(loader_vels)
     loader_rots = np.stack(loader_rots)
+    loader_rot_vels = np.stack(loader_rot_vels)
     in_loader_percents = np.stack(in_loader_percents)
     waterlines = np.stack(waterlines)
     targeted_poss = np.stack(targeted_poss)
@@ -152,6 +158,7 @@ if __name__ == "__main__":
     saved_info['loader_pos_trajs'] = loader_poss
     saved_info['loader_vel_trajs'] = loader_vels
     saved_info['loader_rot_trajs'] = loader_rots
+    saved_info['loader_rot_vel_trajs'] = loader_rot_vels
     saved_info['in_loader_percent_trajs'] = in_loader_percents
     saved_info['waterline_trajs'] = waterlines
     saved_info['targeted_pos_trajs'] = targeted_poss

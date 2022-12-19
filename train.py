@@ -171,7 +171,7 @@ if __name__ == "__main__":
     env_kwargs['achieved_amount_zero_reward_coeff'] = args.achieved_amount_zero_reward_coeff
 
     if not env_kwargs['use_cached_states']:
-        print('Waiting to generate environment variations. May take 1 minute for each variation...')
+        print('Waiting to generate environment variations...')
 
     eval_env_kwargs = env_kwargs.copy()
     # eval_env_kwargs['use_cached_states'] = True
