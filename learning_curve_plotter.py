@@ -61,14 +61,14 @@ class Learning_Curve_Plotter(object):
 
         
     def process_data(self):
-        self.non_eval_data = self._process_non_eval_data(self.non_eval_monitor_files, self.non_eval_sample_freq, self.non_eval_smooth_window_size)
+        # self.non_eval_data = self._process_non_eval_data(self.non_eval_monitor_files, self.non_eval_sample_freq, self.non_eval_smooth_window_size)
         self.eval_data = self._process_eval_data(self.eval_monitor_files, self.eval_freq, self.n_eval_episodes, self.eval_smooth_window_size)
         
         return
 
     
     def plot(self):
-        self._plot_non_eval()
+        # self._plot_non_eval()
         self._plot_eval()
         
         return
@@ -80,7 +80,8 @@ class Learning_Curve_Plotter(object):
         plt.rcParams["font.weight"] = "bold"
         plt.rcParams['axes.labelweight'] = 'bold'
         plt.rcParams['axes.linewidth'] = 2
-        plt.figure(figsize=(12, 6), dpi=100)
+        plt.rcParams['lines.linewidth'] = 3
+        plt.figure(figsize=(12, 9), dpi=100)
         if self.show_legend:
             legend_flag = 'auto'
         else:
@@ -94,10 +95,10 @@ class Learning_Curve_Plotter(object):
         hue_order.reverse()
         color_map = {'SAC': 'grey',
                      'SAC+Vanilla Curriculum': 'skyblue', 
-                     'SAC+Designed Curriculum': 'blue',
+                     'SAC+Designed Curriculum': 'lightcoral',
                      'SAC+HER': 'brown',
-                     'SAC+HER+Vanilla Curriculum': 'gold', 
-                     'SAC+HER+Designed Curriculum': 'red'}
+                     'SAC+HER+Vanilla Curriculum': 'royalblue', 
+                     'SAC+HER+Designed Curriculum': 'tomato'}
         sns.lineplot(data=self.non_eval_data, x="timesteps", y="rollout_rewards_mean", hue="method", ci=68, hue_order=hue_order, legend=legend_flag, palette=color_map)
         plt.xlabel('Time Step (k)')
         plt.ylabel('Reward')
@@ -115,7 +116,8 @@ class Learning_Curve_Plotter(object):
         plt.rcParams["font.weight"] = "bold"
         plt.rcParams['axes.labelweight'] = 'bold'
         plt.rcParams['axes.linewidth'] = 2
-        plt.figure(figsize=(12, 6), dpi=100)
+        plt.rcParams['lines.linewidth'] = 3
+        plt.figure(figsize=(12, 9), dpi=100)
         if self.show_legend:
             legend_flag = 'auto'
         else:
@@ -129,10 +131,10 @@ class Learning_Curve_Plotter(object):
         hue_order.reverse()
         color_map = {'SAC': 'grey',
                      'SAC+Vanilla Curriculum': 'skyblue', 
-                     'SAC+Designed Curriculum': 'blue',
+                     'SAC+Designed Curriculum': 'lightcoral',
                      'SAC+HER': 'brown',
-                     'SAC+HER+Vanilla Curriculum': 'gold', 
-                     'SAC+HER+Designed Curriculum': 'red'}
+                     'SAC+HER+Vanilla Curriculum': 'royalblue', 
+                     'SAC+HER+Designed Curriculum': 'tomato'}
         sns.lineplot(data=self.eval_data, x="eval_timesteps", y="eval_rewards_mean", hue="method", ci=68, hue_order=hue_order, legend=legend_flag, palette=color_map)
         plt.xlabel('Time Step (k)')
         plt.ylabel('Reward')

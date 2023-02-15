@@ -226,13 +226,19 @@ class SAC(OffPolicyAlgorithm):
 
             with th.no_grad():
                 # Select action according to policy
+                # next_actions: [batch_size, action_dim]
+                # next_log_prob: [batch_size,]
                 next_actions, next_log_prob = self.actor.action_log_prob(replay_data.next_observations)
                 # Compute the next Q values: min over all critics targets
+                # next_q_values (double q): [batch_size, 2]
                 next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions), dim=1)
+                # next_q_values: [batch_size, 1]
                 next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
                 # add entropy term
+                # next_q_values: [batch_size, 1]
                 next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1)
                 # td error + entropy term
+                # target_q_values: [batch_size, 1]
                 target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
 
             # Get current Q-values estimates for each critic network
@@ -240,6 +246,8 @@ class SAC(OffPolicyAlgorithm):
             current_q_values = self.critic(replay_data.observations, replay_data.actions)
 
             # Compute critic loss
+            # current_q_values: length 2
+            # current_q_value: [batch_size, 1]
             critic_loss = 0.5 * sum([F.mse_loss(current_q, target_q_values) for current_q in current_q_values])
             critic_losses.append(critic_loss.item())
 

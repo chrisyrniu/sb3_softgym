@@ -2,16 +2,10 @@ import gym
 import numpy as np
 import argparse
 import os.path as osp
-import torch
-from typing import Any, Callable, Dict, Optional, Type, Union
 
 from stable_baselines3.common.utils import set_random_seed
-from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
-from her_replay_buffer import HerReplayBuffer
 from sac import SAC
 
-import softgym
 from softgym.registered_env import env_arg_dict, SOFTGYM_ENVS
 from softgym.utils.normalized_env import normalize
 from softgym.utils.visualization import save_numpy_as_gif
@@ -35,6 +29,8 @@ if __name__ == "__main__":
     # Env args
     parser.add_argument('--loader_name', type=str, default='bowl', help='the type of the loader (bowl|bucket)')
     parser.add_argument('--water_amount_goal', type=float, default=0.60, help='The water amount goal')
+    parser.add_argument('--position_goal', type=int, default=0, choices=[0, 1, 2, 3], help='0 means randomly sample positions from the workspace, 1,2,3 will give three preset position goals')
+    parser.add_argument('--init_waterline', type=int, default=0, choices=[0, 1, 2, 3], help='0 means randomly sample initial waterlines, 1,2,3 will give three preset initial waterlines')
 
     args = parser.parse_args()
 
@@ -47,9 +43,11 @@ if __name__ == "__main__":
     env_kwargs['render'] = args.render
     env_kwargs['headless'] = args.headless
     env_kwargs['curr_mode'] = 0
-    env_kwargs['eval'] = False
+    env_kwargs['eval'] = True
     env_kwargs['loader_name'] = args.loader_name
     env_kwargs['water_amount_goal'] = args.water_amount_goal
+    env_kwargs['eval_position_goal'] = args.position_goal
+    env_kwargs['eval_init_waterline'] = args.init_waterline
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
@@ -166,16 +164,22 @@ if __name__ == "__main__":
     saved_info['reward_trajs'] = rwds
     saved_info['episode_reward_trajs'] = np.array(episode_reward_for_reg)
 
-    with open(f'{args.loader_name}_targeted_amount_{args.water_amount_goal}_saved_trajs.pkl', 'wb') as handle:
+    with open(f'{args.loader_name}_targeted_amount_{args.water_amount_goal}_saved_trajs_seed_{args.seed}.pkl', 'wb') as handle:
         pickle.dump(saved_info, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
-    with open(f'{args.loader_name}_targeted_amount_{args.water_amount_goal}_saved_trajs.pkl', 'rb') as handle:
+    with open(f'{args.loader_name}_targeted_amount_{args.water_amount_goal}_saved_trajs_seed_{args.seed}.pkl', 'rb') as handle:
         data = pickle.load(handle)
 
-    print('testing results:')
+    # print(saved_info['waterline_trajs'])
+    print('testing results')
+    print('number of episodes:', saved_info['in_loader_percent_trajs'].shape[0])
+    print('episode rewards:')
     print(episode_reward_for_reg)
-    print(np.mean(episode_reward_for_reg))
-    print(np.std(episode_reward_for_reg))
+    print('mean:', np.mean(episode_reward_for_reg))
+    print('std:', np.std(episode_reward_for_reg))
+    print('average water amounts from last ten steps:')
+    print(saved_info['in_loader_percent_trajs'][:, -10:, 0])
+    print(np.mean(saved_info['in_loader_percent_trajs'][:, -10:, 0], axis=1))
 
     if args.save_video:
         save_name = osp.join(args.save_video_dir, args.loader_name + '_' + str(args.water_amount_goal) + '.gif')
