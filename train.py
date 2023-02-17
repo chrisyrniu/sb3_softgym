@@ -124,6 +124,9 @@ if __name__ == "__main__":
     parser.add_argument('--curr_start', type=int, default=250000, help='the step to start the curriculum')
     parser.add_argument('--curr_end', type=int, default=650000, help='the step to end the curriculum')
     parser.add_argument('--virtual_water_amount_goal', type=float, default=0.0, help='the single virtual water amount goal for curriculum learning')
+    # Env args
+    parser.add_argument('--pos_goal_lower', type=float, default=0.55, help='the lower bound in height of the postion goal area')
+    parser.add_argument('--pos_goal_upper', type=float, default=0.75, help='the upper bound in height of the postion goal area')
 
 
     args = parser.parse_args()
@@ -169,6 +172,9 @@ if __name__ == "__main__":
     env_kwargs['multi_amount_goals'] = args.multi_amount_goals
     env_kwargs['virtual_water_amount_goal'] = args.virtual_water_amount_goal
     env_kwargs['achieved_amount_zero_reward_coeff'] = args.achieved_amount_zero_reward_coeff
+    env_kwargs['pos_goal_lower'] = args.pos_goal_lower
+    env_kwargs['pos_gaol_upper'] = args.pos_goal_upper
+    
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations...')
