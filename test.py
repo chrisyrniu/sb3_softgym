@@ -34,21 +34,27 @@ if __name__ == "__main__":
     # Env args
     parser.add_argument('--loader_name', type=str, default='bowl', help='the type of the loader (bowl|bucket)')
     parser.add_argument('--water_amount_goal', type=float, default=0.60, help='The water amount goal')
+    parser.add_argument('--pos_goal_lower', type=float, default=0.55, help='the lower bound in height of the postion goal area')
+    parser.add_argument('--pos_goal_upper', type=float, default=0.75, help='the upper bound in height of the postion goal area')
+
+
 
     args = parser.parse_args()
 
     env_kwargs = env_arg_dict[args.env_name]
 
     # Generate and save the initial states for running this environment for the first time
-    env_kwargs['use_cached_states'] = False
+    env_kwargs['use_cached_states'] = True
     env_kwargs['save_cached_states'] = False
     env_kwargs['num_variations'] = args.num_variations
     env_kwargs['render'] = args.render
     env_kwargs['headless'] = args.headless
     env_kwargs['curr_mode'] = 0
-    env_kwargs['eval'] = False
+    env_kwargs['eval'] = True
     env_kwargs['loader_name'] = args.loader_name
     env_kwargs['water_amount_goal'] = args.water_amount_goal
+    env_kwargs['pos_goal_lower'] = args.pos_goal_lower
+    env_kwargs['pos_goal_upper'] = args.pos_goal_upper
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
@@ -61,12 +67,13 @@ if __name__ == "__main__":
     model.set_random_seed(args.seed)
 
     episode_reward_for_reg = []
-    frames = [env.get_image(args.img_size, args.img_size)]
+    frames = []
     for i in range(args.num_episodes):
         print(i)
         done = False
         episode_reward = 0
         obs = env.reset()
+        frames.append(env.get_image(args.img_size, args.img_size))
         t = 0
         while not done:
             t += 1

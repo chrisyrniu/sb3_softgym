@@ -173,7 +173,7 @@ if __name__ == "__main__":
     env_kwargs['virtual_water_amount_goal'] = args.virtual_water_amount_goal
     env_kwargs['achieved_amount_zero_reward_coeff'] = args.achieved_amount_zero_reward_coeff
     env_kwargs['pos_goal_lower'] = args.pos_goal_lower
-    env_kwargs['pos_gaol_upper'] = args.pos_goal_upper
+    env_kwargs['pos_goal_upper'] = args.pos_goal_upper
     
 
     if not env_kwargs['use_cached_states']:
