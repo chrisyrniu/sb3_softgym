@@ -87,12 +87,13 @@ if __name__ == "__main__":
     rwds = []
 
     episode_reward_for_reg = []
-    frames = [env.get_image(args.img_size, args.img_size)]
+    frames = []
     for i in range(args.num_episodes):
         print(i)
         done = False
         episode_reward = 0
         obs = env.reset()
+        frames.append(env.get_image(args.img_size, args.img_size))
         t = 0
         loader_pos = []
         loader_vel = []
