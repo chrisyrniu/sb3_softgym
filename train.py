@@ -89,6 +89,7 @@ if __name__ == "__main__":
     parser.add_argument('--n_envs', help='the number of environments in parallel', type=int, default=1)
     parser.add_argument('--headless', type=int, default=1, help='Whether to run the environment with headless rendering')
     parser.add_argument('--num_variations', type=int, default=1, help='Number of environment variations to be generated')
+    parser.add_argument('--cached_states_path', type=str, default='scoop_water_init_states.pkl', help='the path to save the cached states for softgym envs')
     # parser.add_argument('--achieved_amount_goal_zero_mask', action='store_true', default=False, 
     #                     help='When the the water amount goal is larger than 0, the reward will be -1 if the achieved amount is 0')
     parser.add_argument('--achieved_amount_zero_reward_coeff', type=float, default=1.0)
@@ -127,7 +128,9 @@ if __name__ == "__main__":
     # Env args
     parser.add_argument('--pos_goal_lower', type=float, default=0.55, help='the lower bound in height of the postion goal area')
     parser.add_argument('--pos_goal_upper', type=float, default=0.75, help='the upper bound in height of the postion goal area')
-
+    parser.add_argument('--loader_init_height', type=float, default=0.45, help='the initial height of the loader')
+    parser.add_argument('--pre_curr_pos_lower', type=float, default=0.16, help='the lower bound in height of the sampled position goal area before the curriculum starts')
+    parser.add_argument('--pre_curr_pos_upper', type=float, default=0.45, help='the upper bound in height of the sampled position goal area before the curriculum starts')
 
     args = parser.parse_args()
 
@@ -161,6 +164,7 @@ if __name__ == "__main__":
     env_kwargs['use_cached_states'] = True
     env_kwargs['save_cached_states'] = True
     env_kwargs['num_variations'] = args.num_variations
+    env_kwargs['cached_states_path'] = args.cached_states_path
     env_kwargs['render'] = True
     env_kwargs['headless'] = args.headless
     env_kwargs['curr_mode'] = args.curr_mode
@@ -174,6 +178,9 @@ if __name__ == "__main__":
     env_kwargs['achieved_amount_zero_reward_coeff'] = args.achieved_amount_zero_reward_coeff
     env_kwargs['pos_goal_lower'] = args.pos_goal_lower
     env_kwargs['pos_goal_upper'] = args.pos_goal_upper
+    env_kwargs['loader_init_height'] = args.loader_init_height
+    env_kwargs['pre_curr_pos_lower'] = args.pre_curr_pos_lower
+    env_kwargs['pre_curr_pos_upper'] = args.pre_curr_pos_upper
     
 
     if not env_kwargs['use_cached_states']:
