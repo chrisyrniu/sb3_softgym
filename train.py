@@ -131,6 +131,8 @@ if __name__ == "__main__":
     parser.add_argument('--loader_init_height', type=float, default=0.45, help='the initial height of the loader')
     parser.add_argument('--pre_curr_pos_lower', type=float, default=0.16, help='the lower bound in height of the sampled position goal area before the curriculum starts')
     parser.add_argument('--pre_curr_pos_upper', type=float, default=0.45, help='the upper bound in height of the sampled position goal area before the curriculum starts')
+    parser.add_argument('--post_curr_pos_lower', type=float, default=0.55, help='the lower bound in height of the sampled position goal area after the curriculum')
+    parser.add_argument('--post_curr_pos_upper', type=float, default=0.75, help='the upper bound in height of the sampled position goal area after the curriculum')
 
     args = parser.parse_args()
 
@@ -181,6 +183,9 @@ if __name__ == "__main__":
     env_kwargs['loader_init_height'] = args.loader_init_height
     env_kwargs['pre_curr_pos_lower'] = args.pre_curr_pos_lower
     env_kwargs['pre_curr_pos_upper'] = args.pre_curr_pos_upper
+    env_kwargs['post_curr_pos_lower'] = args.post_curr_pos_lower
+    env_kwargs['post_curr_pos_upper'] = args.post_curr_pos_upper
+
     
 
     if not env_kwargs['use_cached_states']:

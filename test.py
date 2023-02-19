@@ -67,16 +67,20 @@ if __name__ == "__main__":
     model.set_random_seed(args.seed)
 
     episode_reward_for_reg = []
+    in_loader_percents = []
+    
     frames = []
     for i in range(args.num_episodes):
-        print(i)
+        print("episode", i)
         done = False
         episode_reward = 0
         obs = env.reset()
         frames.append(env.get_image(args.img_size, args.img_size))
         t = 0
+        in_loader_percent = []
         while not done:
             t += 1
+            in_loader_percent.append([obs['observation'][8]])
             action, _states = model.predict(obs, deterministic=True)
             obs, reward, done, info = env.step(action, record_continuous_video=True, img_size=args.img_size)
             episode_reward+= reward
@@ -84,10 +88,13 @@ if __name__ == "__main__":
             if done:
                 episode_reward_for_reg.append(episode_reward)
                 break
-    print('testing results:')
-    print(episode_reward_for_reg)
-    print(np.mean(episode_reward_for_reg))
-    print(np.std(episode_reward_for_reg))
+        in_loader_percents.append(in_loader_percent)
+    in_loader_percents = np.array(in_loader_percents)
+    print('testing results')
+    print('episode rewards', episode_reward_for_reg)
+    print('episode reward mean', np.mean(episode_reward_for_reg))
+    print('episode reward std', np.std(episode_reward_for_reg))
+    print('average water amounts from last ten steps:', np.mean(in_loader_percents[:, -10:, 0], axis=1))
 
     if args.save_video:
         save_name = osp.join(args.save_video_dir, args.env_name + '.gif')

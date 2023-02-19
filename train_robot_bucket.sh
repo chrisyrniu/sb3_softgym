@@ -4,17 +4,18 @@ export CUDA_VISIBLE_DEVICES=0
 python -u train.py \
   --env_name ScoopWaterRobot2D \
   --loader_name bucket \
-  --loader_init_height 0.45 \
+  --loader_init_height 0.35 \
   --achieved_amount_zero_reward_coeff 1.0 \
   --her 1 \
   --curr_mode 2 \
-  --curr_start 300000 \
-  --curr_end 900000 \
+  --curr_start 250000 \
+  --curr_end 700000 \
   --water_amount_goal 0.70 \
   --multi_amount_goals 1 \
   --n_envs 1 \
   --headless 1 \
   --num_variations 1000 \
+  --cached_states_path scoop_water_robot_iheight035_states.pkl \
   --training_steps 2000000 \
   --learning_rate 0.0003 \
   --train_freq 1 \
@@ -23,7 +24,7 @@ python -u train.py \
   --batch_size 512 \
   --learning_starts 1000 \
   --device cuda \
-  --max_episode_length_her 150 \
+  --max_episode_length_her 110 \
   --goal_selection_strategy future \
   --n_sampled_goal 4 \
   --online_sampling True \
@@ -31,10 +32,12 @@ python -u train.py \
   --pos_goal_upper 0.45 \
   --pre_curr_pos_lower 0.16 \
   --pre_curr_pos_upper 0.30 \
+  --post_curr_pos_lower 0.30 \
+  --post_curr_pos_upper 0.45 \
   --log_interval 20 \
   --log_dir log_dir_robot \
-  --log_name robot_bucket_init045_area3045_start1630_sac_her_curr_30_90_multi_amount_goals_discrete_0.70_seed0 \
-  --min_reward -65 \
+  --log_name robot_bucket_init035_area3045_s1630e3045_sac_her_curr_25_70_multi_amount_goals_discrete_0.70_seed0 \
+  --min_reward -55 \
   --n_eval_episodes 10 \
   --eval_freq 3000 \
   --save_dir save_dir_robot \

@@ -430,6 +430,9 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         if len(self.ep_info_buffer) > 0 and len(self.ep_info_buffer[0]) > 0:
             self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
             self.logger.record("rollout/ep_len_mean", safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]))
+            if self.ep_info_buffer[0].get("if_virtual_amount_goal") is not None:
+                self.logger.record("rollout/ep_virtual_amount_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer if ep_info["if_virtual_amount_goal"]]))
+                self.logger.record("rollout/ep_final_amount_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer if not ep_info["if_virtual_amount_goal"]]))
         self.logger.record("time/fps", fps)
         self.logger.record("time/time_elapsed", int(time_elapsed), exclude="tensorboard")
         self.logger.record("time/total_timesteps", self.num_timesteps, exclude="tensorboard")
@@ -512,6 +515,29 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         # Save the unnormalized observation
         if self._vec_normalize_env is not None:
             self._last_original_obs = new_obs_
+
+
+    def _update_info_buffer(self, infos: List[Dict[str, Any]], dones: Optional[np.ndarray] = None) -> None:
+        """
+        Retrieve reward, episode length, episode success and update the buffer
+        if using Monitor wrapper or a GoalEnv.
+
+        :param infos: List of additional information about the transition.
+        :param dones: Termination signals
+        """
+        if dones is None:
+            dones = np.array([False] * len(infos))
+        for idx, info in enumerate(infos):
+            maybe_ep_info = info.get("episode")
+            maybe_is_success = info.get("is_success")
+            if maybe_ep_info is not None:
+                self.ep_info_buffer.extend([maybe_ep_info])
+                maybe_if_virtual_amount_goal = info.get("if_virtual_amount_goal")
+                if maybe_if_virtual_amount_goal is not None:
+                    self.ep_info_buffer[-1]["if_virtual_amount_goal"] = maybe_if_virtual_amount_goal
+            if maybe_is_success is not None and dones[idx]:
+                self.ep_success_buffer.append(maybe_is_success)
+
 
     def collect_rollouts(
         self,
