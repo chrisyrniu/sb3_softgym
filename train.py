@@ -83,7 +83,7 @@ def make_vec_env(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
-    # Env args
+    ### Env args
     parser.add_argument('--loader_name', type=str, default='bowl', help='the type of the loader (bowl|bucket)')
     parser.add_argument('--env_name', type=str, default='DistributeWater')
     parser.add_argument('--n_envs', help='the number of environments in parallel', type=int, default=1)
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     # parser.add_argument('--achieved_amount_goal_zero_mask', action='store_true', default=False, 
     #                     help='When the the water amount goal is larger than 0, the reward will be -1 if the achieved amount is 0')
     parser.add_argument('--achieved_amount_zero_reward_coeff', type=float, default=1.0)
-    # Train args
+    ### Train args
     parser.add_argument('--training_steps', type=int, default=50000, help='Number of total timesteps of training')
     parser.add_argument('--train_freq', type=int, default=1, help='Update (call the train function) the model every train_freq steps (train_freq*n if do multi-processing)')
     parser.add_argument('--grad_steps', type=int, default=1, help='How many gradient steps to do for each train function call (after each rollout and it can only rollout one step at a time)')
@@ -108,11 +108,11 @@ if __name__ == "__main__":
     parser.add_argument('--log_name', help='the name of the run for TensorBoard logging', type=str, default='SAC')
     parser.add_argument('--save_dir', help='the path to save models', type=str, default='save_dir')
     parser.add_argument('--seed', help='the seed number to use', type=int, default=0)
-    # Evaluate args
+    ### Evaluate args
     parser.add_argument('--min_reward', help='minimum reward to save the model', type=float)
     parser.add_argument('--n_eval_episodes', help='the number of episodes for each evaluation during training', type=int, default=5)
     parser.add_argument('--eval_freq', help='evaluation frequence of the model', type=int, default=1500)
-    # HER args
+    ### HER args
     parser.add_argument('--her', type=int, default=0, help='Whether to use hindsight experience replay')
     parser.add_argument('--max_episode_length_her', type=int, default=75, help="The maximum length of an episode (only required for using HER)")
     parser.add_argument('--goal_selection_strategy', type=str, default='future', help='Strategy for sampling goals for replay (future, final or episode)')
@@ -120,19 +120,27 @@ if __name__ == "__main__":
     parser.add_argument('--online_sampling', type=bool, default=True, help='If new transitions will not be saved in the replay buffer and will only be created at sampling time')
     parser.add_argument('--water_amount_goal', type=float, default=0.60, help='The water amount goal')
     parser.add_argument('--multi_amount_goals', type=int, default=0, choices=[0, 1, 2], help='The type of setting multiple water amount goals (0 for none, 1 for discrete values, 2 for a continuous range)')
-    # Curriculum Learning args
+    
+    ### Curriculum Learning args
     parser.add_argument('--curr_mode', type=int, default=0, help='the curriculum learning mode to use (0: no curriculum, 1: base curriculum, 2: designed curriculum)')
+    # -Curriculum on the position goals
     parser.add_argument('--curr_start', type=int, default=250000, help='the step to start the curriculum')
     parser.add_argument('--curr_end', type=int, default=650000, help='the step to end the curriculum')
-    parser.add_argument('--virtual_water_amount_goal', type=float, default=0.0, help='the single virtual water amount goal for curriculum learning')
-    # Env args
-    parser.add_argument('--pos_goal_lower', type=float, default=0.55, help='the lower bound in height of the postion goal area')
-    parser.add_argument('--pos_goal_upper', type=float, default=0.75, help='the upper bound in height of the postion goal area')
-    parser.add_argument('--loader_init_height', type=float, default=0.45, help='the initial height of the loader')
     parser.add_argument('--pre_curr_pos_lower', type=float, default=0.16, help='the lower bound in height of the sampled position goal area before the curriculum starts')
     parser.add_argument('--pre_curr_pos_upper', type=float, default=0.45, help='the upper bound in height of the sampled position goal area before the curriculum starts')
     parser.add_argument('--post_curr_pos_lower', type=float, default=0.55, help='the lower bound in height of the sampled position goal area after the curriculum')
     parser.add_argument('--post_curr_pos_upper', type=float, default=0.75, help='the upper bound in height of the sampled position goal area after the curriculum')
+    # -Curriculum on the water amount goals
+    parser.add_argument('--virtual_water_amount_goal', type=float, default=0.0, help='the single virtual water amount goal for curriculum learning')
+    parser.add_argument('--amount_curr_start', type=int, default=250000, help='the step to start the curriculum for amount goal')
+    parser.add_argument('--amount_curr_end', type=int, default=700000, help='the step to end the curriculum for amount goal')
+    parser.add_argument('--pre_curr_prob', type=float, default=0.51, help='the probability of sampling the virtual amount goal before the curriculum')
+    parser.add_argument('--post_curr_prob', type=float, default=0.51, help='the probability of sampling the virtual amount goal after the curriculum')
+
+    ### Env args
+    parser.add_argument('--pos_goal_lower', type=float, default=0.55, help='the lower bound in height of the postion goal area')
+    parser.add_argument('--pos_goal_upper', type=float, default=0.75, help='the upper bound in height of the postion goal area')
+    parser.add_argument('--loader_init_height', type=float, default=0.45, help='the initial height of the loader')
 
     args = parser.parse_args()
 
@@ -176,7 +184,6 @@ if __name__ == "__main__":
     env_kwargs['curr_end'] = args.curr_end
     env_kwargs['water_amount_goal'] = args.water_amount_goal
     env_kwargs['multi_amount_goals'] = args.multi_amount_goals
-    env_kwargs['virtual_water_amount_goal'] = args.virtual_water_amount_goal
     env_kwargs['achieved_amount_zero_reward_coeff'] = args.achieved_amount_zero_reward_coeff
     env_kwargs['pos_goal_lower'] = args.pos_goal_lower
     env_kwargs['pos_goal_upper'] = args.pos_goal_upper
@@ -185,8 +192,11 @@ if __name__ == "__main__":
     env_kwargs['pre_curr_pos_upper'] = args.pre_curr_pos_upper
     env_kwargs['post_curr_pos_lower'] = args.post_curr_pos_lower
     env_kwargs['post_curr_pos_upper'] = args.post_curr_pos_upper
-
-    
+    env_kwargs['virtual_water_amount_goal'] = args.virtual_water_amount_goal
+    env_kwargs['amount_curr_start'] = args.amount_curr_start
+    env_kwargs['amount_curr_end'] = args.amount_curr_end
+    env_kwargs['pre_curr_prob'] = args.pre_curr_prob
+    env_kwargs['post_curr_prob'] = args.post_curr_prob
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations...')
