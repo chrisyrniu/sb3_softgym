@@ -31,19 +31,18 @@ python -u train.py \
   --pos_goal_lower 0.55 \
   --pos_goal_upper 0.75 \
   --pre_curr_pos_lower 0.16 \
-  --pre_curr_pos_upper 0.45 \
-  --post_curr_pos_lower 0.55 \
+  --pre_curr_pos_upper 0.75 \
+  --post_curr_pos_lower 0.16 \
   --post_curr_pos_upper 0.75 \
   --amount_curr_start 250000 \
   --amount_curr_end 550000 \
-  --pre_curr_prob 0.51 \
-  --post_curr_prob 0.85 \
+  --pre_curr_prob 1.01 \
+  --post_curr_prob 1.01 \
   --log_interval 20 \
   --log_dir log_dir_new/amount_goal_exp \
-  --log_name bucket_init045_area5575_s1645e5575_amount070m_s51e85_sac_her_curr_p2585a2555_seed0 \
+  --log_name bucket_init045_area5575_s1675e1675_amount070m_s101e101_sac_her_curr_p2585a2555_seed0 \
   --min_reward -38 \
   --n_eval_episodes 10 \
   --eval_freq 3000 \
   --save_dir save_dir_new/amount_goal_exp \
   --seed 0
-
