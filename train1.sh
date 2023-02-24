@@ -16,7 +16,7 @@ python -u train.py \
   --headless 1 \
   --num_variations 1000 \
   --cached_states_path pour_water_init_states.pkl \
-  --training_steps 1000000 \
+  --training_steps 1500000 \
   --learning_rate 0.0003 \
   --train_freq 1 \
   --grad_steps 1 \
