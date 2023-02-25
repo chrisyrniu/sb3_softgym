@@ -16,10 +16,11 @@ do
         --render 1 \
         --num_episodes 1 \
         --save_video 1 \
-        --save_dir scaled_trajs \
+        --save_dir scaled_trajs_init_height060 \
         --water_amount_goal ${water_amount_goal} \
         --position_goal ${position_goal} \
         --init_waterline ${init_waterline} \
+        --loader_init_height 0.6 \
         --seed 0
     done
   done

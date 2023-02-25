@@ -23,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--env_name', type=str, default='DistributeWater')
     parser.add_argument('--headless', type=int, default=1, help='Whether to run the environment with headless rendering')
     parser.add_argument('--num_variations', type=int, default=1, help='Number of environment variations to be generated')
+    parser.add_argument('--cached_states_path', type=str, default='scoop_water_init_states.pkl', help='the path to save the cached states for softgym envs')
     parser.add_argument('--device', type=str, default='cpu', help='the type of device to use (cpu|cuda)')
     parser.add_argument('--load_file_dir', help='the path to model to test', type=str, default='save_dir/model.zip')
     parser.add_argument('--render', type=int, default=0, help='if render the tested environment')
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     parser.add_argument('--water_amount_goal', type=float, default=0.60, help='The water amount goal')
     parser.add_argument('--pos_goal_lower', type=float, default=0.55, help='the lower bound in height of the postion goal area')
     parser.add_argument('--pos_goal_upper', type=float, default=0.75, help='the upper bound in height of the postion goal area')
-
+    parser.add_argument('--loader_init_height', type=float, default=0.45, help='the initial height of the loader')
 
 
     args = parser.parse_args()
@@ -47,6 +48,7 @@ if __name__ == "__main__":
     env_kwargs['use_cached_states'] = True
     env_kwargs['save_cached_states'] = False
     env_kwargs['num_variations'] = args.num_variations
+    env_kwargs['cached_states_path'] = args.cached_states_path
     env_kwargs['render'] = args.render
     env_kwargs['headless'] = args.headless
     env_kwargs['curr_mode'] = 0
@@ -55,6 +57,7 @@ if __name__ == "__main__":
     env_kwargs['water_amount_goal'] = args.water_amount_goal
     env_kwargs['pos_goal_lower'] = args.pos_goal_lower
     env_kwargs['pos_goal_upper'] = args.pos_goal_upper
+    env_kwargs['loader_init_height'] = args.loader_init_height
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')

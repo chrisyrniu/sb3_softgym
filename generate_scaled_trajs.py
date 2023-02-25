@@ -29,6 +29,7 @@ if __name__ == "__main__":
     parser.add_argument('--water_amount_goal', type=float, default=0.60, help='The water amount goal')
     parser.add_argument('--position_goal', type=int, default=0, choices=[0, 1, 2, 3], help='0 means randomly sample positions from the workspace, 1,2,3 will give three preset position goals')
     parser.add_argument('--init_waterline', type=int, default=0, choices=[0, 1, 2, 3], help='0 means randomly sample initial waterlines, 1,2,3 will give three preset initial waterlines')
+    parser.add_argument('--loader_init_height', type=float, default=0.45, help='the initial height of the loader')
 
     args = parser.parse_args()
 
@@ -49,6 +50,8 @@ if __name__ == "__main__":
     env_kwargs['water_amount_goal'] = args.water_amount_goal
     env_kwargs['eval_position_goal'] = args.position_goal
     env_kwargs['eval_init_waterline'] = args.init_waterline
+    env_kwargs['loader_init_height'] = args.loader_init_height
+    env_kwargs['cached_states_path'] = args.cached_states_path
 
     set_random_seed(args.seed)
     env = normalize(SOFTGYM_ENVS[args.env_name](**env_kwargs))
