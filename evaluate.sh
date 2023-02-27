@@ -11,10 +11,11 @@ python -u test.py \
   --save_cached_states \
   --cached_states_path bucket_evaluation_128.pkl \
   --device cuda \
-  --load_file_dir save_dir_new/amount_goal_exp/bucket_init045_area5575_s1645e5575_amount070m_s30e90_sac_her_curr_p2585a2070_seed0/sac_her_curr_seed0_best_model \
+  --load_file_dir save_dir_new/bucket/multi_goal/bucket_sac_multi_amount_goals_discrete_0.70_seed0/sac_seed0_best_model \
   --render 1 \
   --num_episodes 100 \
   --pos_goal_lower 0.55 \
   --pos_goal_upper 0.60 \
   --seed 0 \
-  --save_video 0
+  --save_video 0 \
+  --save_video_dir videos/
