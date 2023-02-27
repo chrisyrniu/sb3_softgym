@@ -83,16 +83,18 @@ if __name__ == "__main__":
         done = False
         episode_reward = 0
         obs = env.reset()
-        frames.append(env.get_image(args.img_size, args.img_size))
+        if args.save_video:
+            frames.append(env.get_image(args.img_size, args.img_size))
         t = 0
         in_loader_percent = []
         while not done:
             t += 1
             action, _states = model.predict(obs, deterministic=True)
-            obs, reward, done, info = env.step(action, record_continuous_video=True, img_size=args.img_size)
+            obs, reward, done, info = env.step(action, record_continuous_video=args.save_video, img_size=args.img_size)
             in_loader_percent.append([obs['observation'][8]])
             episode_reward+= reward
-            frames.extend(info['flex_env_recorded_frames'])
+            if args.save_video:
+                frames.extend(info['flex_env_recorded_frames'])
             if done:
                 episode_reward_for_reg.append(episode_reward)
                 water_amount_goals.append(info['amount_goal'])
