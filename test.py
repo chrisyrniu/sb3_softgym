@@ -2,7 +2,7 @@ import gym
 import numpy as np
 import argparse
 import os.path as osp
-import torch
+import os
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 from stable_baselines3.common.utils import set_random_seed
@@ -41,6 +41,8 @@ if __name__ == "__main__":
     parser.add_argument('--pos_goal_lower', type=float, default=0.55, help='the lower bound in height of the postion goal area')
     parser.add_argument('--pos_goal_upper', type=float, default=0.75, help='the upper bound in height of the postion goal area')
     parser.add_argument('--loader_init_height', type=float, default=0.45, help='the initial height of the loader')
+    parser.add_argument('--acc_limit_scale', type=float, default=1.0)
+    parser.add_argument('--vel_limit_scale', type=float, default=1.0)
 
 
     args = parser.parse_args()
@@ -62,6 +64,8 @@ if __name__ == "__main__":
     env_kwargs['pos_goal_lower'] = args.pos_goal_lower
     env_kwargs['pos_goal_upper'] = args.pos_goal_upper
     env_kwargs['loader_init_height'] = args.loader_init_height
+    env_kwargs['acc_limit_scale'] = args.acc_limit_scale
+    env_kwargs['vel_limit_scale'] = args.vel_limit_scale
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations. May take 1 minute for each variation...')
@@ -113,6 +117,8 @@ if __name__ == "__main__":
     print('average error:', error)
 
     if args.save_video:
+        if not os.path.exists(args.save_video_dir):
+            os.makedirs(args.save_video_dir)
         save_name = osp.join(args.save_video_dir, args.env_name + '.gif')
         save_numpy_as_gif(np.array(frames), save_name)
         print('Video generated and save to {}'.format(save_name))
