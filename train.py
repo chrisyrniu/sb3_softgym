@@ -141,6 +141,8 @@ if __name__ == "__main__":
     parser.add_argument('--pos_goal_lower', type=float, default=0.55, help='the lower bound in height of the postion goal area')
     parser.add_argument('--pos_goal_upper', type=float, default=0.75, help='the upper bound in height of the postion goal area')
     parser.add_argument('--loader_init_height', type=float, default=0.45, help='the initial height of the loader')
+    parser.add_argument('--acc_limit_scale', type=float, default=1.0)
+    parser.add_argument('--vel_limit_scale', type=float, default=1.0)
 
     args = parser.parse_args()
 
@@ -197,6 +199,8 @@ if __name__ == "__main__":
     env_kwargs['amount_curr_end'] = args.amount_curr_end
     env_kwargs['pre_curr_prob'] = args.pre_curr_prob
     env_kwargs['post_curr_prob'] = args.post_curr_prob
+    env_kwargs['acc_limit_scale'] = args.acc_limit_scale
+    env_kwargs['vel_limit_scale'] = args.vel_limit_scale
 
     if not env_kwargs['use_cached_states']:
         print('Waiting to generate environment variations...')

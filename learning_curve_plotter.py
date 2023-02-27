@@ -42,11 +42,12 @@ class Learning_Curve_Plotter(object):
         
         if method_names == None:
             self.method_names = {'SAC': 'sac',
-                                 'SAC+Vanilla Curriculum': 'sac_vanilla_curr', 
-                                 'SAC+Designed Curriculum': 'sac_curr',
+                                 'SAC+Universal GS': 'sac_vanilla_curr', 
+                                 'SAC+Partially Adaptive GS': 'sac_curr',
                                  'SAC+HER': 'sac_her',
-                                 'SAC+HER+Vanilla Curriculum': 'sac_her_vanilla_curr', 
-                                 'SAC+HER+Designed Curriculum': 'sac_her_curr'}
+                                 'SAC+HER+Universal GS': 'sac_her_vanilla_curr', 
+                                 'SAC+HER+Partially Adaptive GS': 'sac_her_curr',
+                                 'GOATS': 'goats'}
         else:
             self.method_names = method_names
 
@@ -87,18 +88,20 @@ class Learning_Curve_Plotter(object):
         else:
             legend_flag = False
         hue_order = ['SAC',
-                     'SAC+Vanilla Curriculum',
-                     'SAC+Designed Curriculum',
+                     'SAC+Universal GS',
+                     'SAC+Partially Adaptive GS',
                      'SAC+HER',
-                     'SAC+HER+Vanilla Curriculum',
-                     'SAC+HER+Designed Curriculum']
+                     'SAC+HER+Universal GS',
+                     'SAC+HER+Partially Adaptive GS',
+                     'GOATS']
         hue_order.reverse()
         color_map = {'SAC': 'grey',
-                     'SAC+Vanilla Curriculum': 'skyblue', 
-                     'SAC+Designed Curriculum': 'lightcoral',
+                     'SAC+Universal GS': 'royalblue', 
+                     'SAC+Partially Adaptive GS': 'lightcoral',
                      'SAC+HER': 'brown',
-                     'SAC+HER+Vanilla Curriculum': 'royalblue', 
-                     'SAC+HER+Designed Curriculum': 'tomato'}
+                     'SAC+HER+Universal GS': 'skyblue', 
+                     'SAC+HER+Partially Adaptive GS': 'tomato',
+                     'GOATS': "blueviolet"}
         sns.lineplot(data=self.non_eval_data, x="timesteps", y="rollout_rewards_mean", hue="method", ci=68, hue_order=hue_order, legend=legend_flag, palette=color_map)
         plt.xlabel('Time Step (k)')
         plt.ylabel('Reward')
@@ -123,18 +126,20 @@ class Learning_Curve_Plotter(object):
         else:
             legend_flag = False
         hue_order = ['SAC',
-                     'SAC+Vanilla Curriculum',
-                     'SAC+Designed Curriculum',
+                     'SAC+Universal GS',
+                     'SAC+Partially Adaptive GS',
                      'SAC+HER',
-                     'SAC+HER+Vanilla Curriculum',
-                     'SAC+HER+Designed Curriculum']
+                     'SAC+HER+Universal GS',
+                     'SAC+HER+Partially Adaptive GS',
+                     'GOATS']
         hue_order.reverse()
         color_map = {'SAC': 'grey',
-                     'SAC+Vanilla Curriculum': 'skyblue', 
-                     'SAC+Designed Curriculum': 'lightcoral',
+                     'SAC+Universal GS': 'royalblue', 
+                     'SAC+Partially Adaptive GS': 'lightcoral',
                      'SAC+HER': 'brown',
-                     'SAC+HER+Vanilla Curriculum': 'royalblue', 
-                     'SAC+HER+Designed Curriculum': 'tomato'}
+                     'SAC+HER+Universal GS': 'skyblue', 
+                     'SAC+HER+Partially Adaptive GS': 'tomato',
+                     'GOATS': "blueviolet"}
         sns.lineplot(data=self.eval_data, x="eval_timesteps", y="eval_rewards_mean", hue="method", ci=68, hue_order=hue_order, legend=legend_flag, palette=color_map)
         plt.xlabel('Time Step (k)')
         plt.ylabel('Reward')

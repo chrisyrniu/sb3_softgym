@@ -51,7 +51,6 @@ if __name__ == "__main__":
     env_kwargs['eval_position_goal'] = args.position_goal
     env_kwargs['eval_init_waterline'] = args.init_waterline
     env_kwargs['loader_init_height'] = args.loader_init_height
-    env_kwargs['cached_states_path'] = args.cached_states_path
 
     set_random_seed(args.seed)
     env = normalize(SOFTGYM_ENVS[args.env_name](**env_kwargs))
