@@ -135,7 +135,7 @@ for ii in range(len(amount_goal_ls)):
 
             for i in range(start_ite,end_ite,setp_ite):
                 ## in Shiyu's frame
-                print(cur_path_xyz.shape)
+                # print(cur_path_xyz.shape)
                 x_shiyu = cur_path_xyz[i,0]
                 y_shiyu = cur_path_xyz[i,1]
                 z_shiyu = cur_path_xyz[i,2]
