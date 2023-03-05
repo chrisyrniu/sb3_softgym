@@ -12,12 +12,12 @@ import matplotlib.patches as mpatches
 import mpl_toolkits.mplot3d.art3d as art3d
 import os
 
-amount_goal_ls = [0.6, 0.7]
-pos_goal_ls = [2]
-waterline_ls = [2]
-start_ite, end_ite, setp_ite = 0, 110, 5
-folder_path = 'data/trajs_data_10'
-traj_folder_path = '/waterlines_7_8_9/scaled_trajs_23cm'
+# amount_goal_ls = [0.6, 0.7]
+# pos_goal_ls = [2]
+# waterline_ls = [2]
+# start_ite, end_ite, setp_ite = 0, 110, 5
+# folder_path = 'data/trajs_data_10'
+# traj_folder_path = '/waterlines_7_8_9/scaled_trajs_23cm'
 
 # amount_goal_ls = [0.6]
 # pos_goal_ls = [2]
@@ -40,12 +40,12 @@ traj_folder_path = '/waterlines_7_8_9/scaled_trajs_23cm'
 # folder_path = 'data/trajs_data_10'
 # traj_folder_path = '/waterlines_7_8.5_10/scaled_trajs_30cm'
 
-# amount_goal_ls = [0.65]
-# pos_goal_ls = [1, 2, 3]
-# waterline_ls = [2]
-# start_ite, end_ite, setp_ite = 0, 110, 5
-# folder_path = 'data/trajs_data_10'
-# traj_folder_path = '/waterlines_7_8.5_10/scaled_trajs_40cm'
+amount_goal_ls = [0.65]
+pos_goal_ls = [1, 2, 3]
+waterline_ls = [2]
+start_ite, end_ite, setp_ite = 0, 110, 5
+folder_path = 'data/trajs_data_10'
+traj_folder_path = '/waterlines_7_8.5_10/scaled_trajs_40cm'
 
 saveFig = 1
 
@@ -226,7 +226,7 @@ for ii in range(len(amount_goal_ls)):
             ax.scatter(desired_pos_goal[2], desired_pos_goal[0], desired_pos_goal[1], marker="x", color="red", s = 60,label="desired position goal")
 
             # plot water line
-            x_waterline = np.array([-0.2,0.35])
+            x_waterline = np.array([-0.2,0.39])
             y_waterline = np.array([0,0])
             z_waterline = np.array([first_waterline_h,first_waterline_h])
             ax.plot3D(x_waterline,y_waterline,z_waterline,color="blue",label = 'waterline')
@@ -255,8 +255,9 @@ for ii in range(len(amount_goal_ls)):
 
             # figure setting
             ax.axis('scaled')
-            ax.set_xlim([-0.2,0.35])
-            ax.set_zlim([0.,0.52])
+            ax.set_box_aspect((1, 1, 1))
+            ax.set_xlim([-0.20,0.39])
+            ax.set_zlim([0.,0.558])
             # ax.axis('scaled')
 
             plt.tick_params(axis = 'x',labelsize=15)
@@ -267,10 +268,10 @@ for ii in range(len(amount_goal_ls)):
             ax.set_zlabel('z', labelpad=20, fontsize=20)   
             # ax.set_title(f'AmountGoal {amount_goal}, PosGoal {pos_goal}, WaterLine {waterline}')
             # plt.legend(loc=(0.56, 0.61), fontsize=11)
-            # plt.legend(loc=(0.56, 0.45), fontsize=11)
-            plt.legend(loc=(0.56, 0.61), fontsize=11)
+            plt.legend(loc=(0.544, 0.671), fontsize=11)
+            # plt.legend(loc=(0.54, 0.61), fontsize=11)
             if saveFig == 0:
                 plt.show()
             else:
                 fig_name = f'AG{amount_goal}_PG{pos_goal}_WL{waterline}.png'
-                plt.savefig(save_path+'/'+fig_name, bbox_inches='tight')
+                plt.savefig(save_path+'/'+fig_name, bbox_inches='tight', pad_inches = -0.7)
